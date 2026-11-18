@@ -58,7 +58,7 @@ Download the latest release from
 <details open>
 <summary><b>Windows</b></summary>
 
-1. Download `HeartBridge-x.y.z-windows-x64.zip`, extract it anywhere and run `heartbridge.exe`.
+1. Download `HeartBridge-vX.Y.Z-windows-x64.zip`, extract it anywhere and run `heartbridge.exe`.
 2. Settings are saved next to the executable, so the folder can live on a USB stick.
 
 </details>
@@ -66,7 +66,7 @@ Download the latest release from
 <details open>
 <summary><b>Linux</b></summary>
 
-1. Download `HeartBridge-x.y.z-linux-x86_64.tar.gz` and extract it:
+1. Download `HeartBridge-vX.Y.Z-linux-x86_64.tar.gz` and extract it:
 
    ```sh
    tar xzf HeartBridge-*-linux-x86_64.tar.gz
@@ -84,7 +84,7 @@ Download the latest release from
 <details open>
 <summary><b>macOS</b></summary>
 
-1. Download `HeartBridge-x.y.z-macos-arm64.tar.gz` (Apple Silicon) and extract it.
+1. Download `HeartBridge-vX.Y.Z-macos-arm64.tar.gz` (Apple Silicon) and extract it.
 2. The build is not notarized, so clear the download flag once and start it from Terminal:
 
    ```sh
