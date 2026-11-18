@@ -43,8 +43,12 @@ impl Popup {
         Self { opened: Instant::now(), anchor, had_focus: false, shown: false }
     }
 
+    /// Above the click when there's room (Windows taskbar at the bottom),
+    /// below it otherwise (macOS menu bar at the top).
     fn pos(&self, h: f32) -> Pos2 {
-        pos2((self.anchor.x - POPUP_W + 8.0).max(0.0), (self.anchor.y - h - 8.0).max(0.0))
+        let x = (self.anchor.x - POPUP_W + 8.0).max(0.0);
+        let y = if self.anchor.y - h - 8.0 >= 0.0 { self.anchor.y - h - 8.0 } else { self.anchor.y + 8.0 };
+        pos2(x, y)
     }
 }
 
@@ -195,7 +199,7 @@ impl eframe::App for HeartBridgeApp {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let view = View::capture(&self.shared.state());
         if let Some(tray) = &mut self.tray {
-            tray.update(view.bpm, view.summary(&self.cfg).1);
+            tray.update(view.bpm, view.summary(&self.cfg).1, self.cfg.send_params, self.cfg.send_chatbox);
             let actions: Vec<TrayAction> = tray.events.try_iter().collect();
             for a in actions {
                 match a {
@@ -209,6 +213,10 @@ impl eframe::App for HeartBridgeApp {
                         let ppp = ctx.input(|i| i.viewport().native_pixels_per_point).unwrap_or(1.0);
                         self.popup = Some(Popup::new(pos2(x as f32 / ppp, y as f32 / ppp)));
                     }
+                    TrayAction::ShowWindow => self.set_window_visible(ctx, true),
+                    TrayAction::ToggleParams => self.cfg.send_params = !self.cfg.send_params,
+                    TrayAction::ToggleChatbox => self.cfg.send_chatbox = !self.cfg.send_chatbox,
+                    TrayAction::Quit => self.quit(ctx),
                 }
             }
         }
@@ -224,6 +232,9 @@ impl eframe::App for HeartBridgeApp {
         if (self.popup.is_some() || self.debug_open) && !self.window_visible {
             ctx.send_viewport_cmd_to(ViewportId::ROOT, ViewportCommand::RequestPaintWhileHidden);
         }
+
+        // The tray menu can change settings while the window is hidden.
+        self.commit_config(ctx);
     }
 
     fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {

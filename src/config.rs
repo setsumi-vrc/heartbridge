@@ -1,4 +1,4 @@
-//! Settings persisted to `heartbridge.json` next to the executable.
+//! Settings persisted to `heartbridge.json` (location per platform, see `Config::dir`).
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -52,12 +52,34 @@ impl Default for Config {
     }
 }
 
+#[cfg(not(windows))]
+fn home() -> PathBuf {
+    std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."))
+}
+
 impl Config {
+    /// Windows: next to the executable (portable). macOS:
+    /// ~/Library/Application Support/HeartBridge. Linux: ~/.config/heartbridge.
     fn dir() -> PathBuf {
-        std::env::current_exe()
-            .ok()
-            .and_then(|p| p.parent().map(|d| d.to_path_buf()))
-            .unwrap_or_else(|| PathBuf::from("."))
+        #[cfg(windows)]
+        {
+            std::env::current_exe()
+                .ok()
+                .and_then(|p| p.parent().map(|d| d.to_path_buf()))
+                .unwrap_or_else(|| PathBuf::from("."))
+        }
+        #[cfg(target_os = "macos")]
+        {
+            home().join("Library/Application Support/HeartBridge")
+        }
+        #[cfg(not(any(windows, target_os = "macos")))]
+        {
+            std::env::var_os("XDG_CONFIG_HOME")
+                .map(PathBuf::from)
+                .filter(|p| p.is_absolute())
+                .unwrap_or_else(|| home().join(".config"))
+                .join("heartbridge")
+        }
     }
 
     fn path() -> PathBuf {
@@ -76,6 +98,7 @@ impl Config {
 
     pub fn save(&self) {
         if let Ok(json) = serde_json::to_string_pretty(self) {
+            let _ = std::fs::create_dir_all(Self::dir());
             let _ = std::fs::write(Self::path(), json);
         }
     }

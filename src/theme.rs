@@ -1,5 +1,6 @@
-//! Palette, fonts and visual style. Fonts come from Windows itself
-//! (C:\Windows\Fonts); if missing, egui's built-in ones are used.
+//! Palette, fonts and visual style. Fonts come from the system (Segoe UI
+//! and Bahnschrift on Windows, SF and DIN on macOS, whatever fontconfig
+//! picks on Linux); if none are found, egui's built-in ones are used.
 
 use std::sync::Arc;
 
@@ -40,9 +41,65 @@ pub mod pal {
 pub const NUMERAL: &str = "numeral";
 pub const UI_STRONG: &str = "ui-strong";
 
-fn read_font(file: &str) -> Option<Vec<u8>> {
+/// The three faces the app uses.
+#[derive(Clone, Copy)]
+enum Face {
+    /// Regular UI text.
+    Ui,
+    /// The big number (a DIN-style face where available).
+    Numeral,
+    /// Fallback for symbols like the chatbox ❤.
+    Symbols,
+}
+
+/// First existing file among the candidates for this face.
+fn read_font(face: Face) -> Option<Vec<u8>> {
+    candidates(face).into_iter().find_map(|p| std::fs::read(p).ok())
+}
+
+#[cfg(windows)]
+fn candidates(face: Face) -> Vec<String> {
     let dir = std::env::var("WINDIR").unwrap_or_else(|_| r"C:\Windows".into());
-    std::fs::read(format!(r"{dir}\Fonts\{file}")).ok()
+    let file = match face {
+        Face::Ui => "SegUIVar.ttf",
+        Face::Numeral => "bahnschrift.ttf",
+        Face::Symbols => "seguisym.ttf",
+    };
+    vec![format!(r"{dir}\Fonts\{file}")]
+}
+
+#[cfg(target_os = "macos")]
+fn candidates(face: Face) -> Vec<String> {
+    let v: &[&str] = match face {
+        Face::Ui => &["/System/Library/Fonts/SFNS.ttf", "/System/Library/Fonts/Helvetica.ttc"],
+        Face::Numeral => &[
+            "/System/Library/Fonts/Supplemental/DIN Alternate Bold.ttf",
+            "/System/Library/Fonts/SFNS.ttf",
+        ],
+        Face::Symbols => &[
+            "/System/Library/Fonts/Apple Symbols.ttf",
+            "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        ],
+    };
+    v.iter().map(|s| s.to_string()).collect()
+}
+
+/// Asks fontconfig, which every Linux desktop has.
+#[cfg(not(any(windows, target_os = "macos")))]
+fn candidates(face: Face) -> Vec<String> {
+    let pattern = match face {
+        Face::Ui => "sans-serif",
+        Face::Numeral => "sans-serif:bold",
+        Face::Symbols => "sans-serif:charset=2764",
+    };
+    std::process::Command::new("fc-match")
+        .args(["-f", "%{file}", pattern])
+        .output()
+        .ok()
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .filter(|p| !p.is_empty())
+        .into_iter()
+        .collect()
 }
 
 fn with_weight(bytes: &[u8], wght: f32) -> Arc<FontData> {
@@ -60,15 +117,15 @@ pub fn install(ctx: &egui::Context) {
         fonts.families.entry(family).or_default().insert(0, key.into());
     };
 
-    if let Some(b) = read_font("SegUIVar.ttf") {
+    if let Some(b) = read_font(Face::Ui) {
         add("segoe-400", with_weight(&b, 400.0), FontFamily::Proportional);
         add("segoe-600", with_weight(&b, 600.0), FontFamily::Name(UI_STRONG.into()));
     }
-    if let Some(b) = read_font("bahnschrift.ttf") {
+    if let Some(b) = read_font(Face::Numeral) {
         add("din-700", with_weight(&b, 700.0), FontFamily::Name(NUMERAL.into()));
     }
-    // Segoe UI Symbol covers ❤ and other chatbox symbols that Segoe UI lacks.
-    if let Some(b) = read_font("seguisym.ttf") {
+    // Covers ❤ and other chatbox symbols that the UI face may lack.
+    if let Some(b) = read_font(Face::Symbols) {
         fonts.font_data.insert("symbols".into(), Arc::new(FontData::from_owned(b)));
         let list = fonts.families.entry(FontFamily::Proportional).or_default();
         let at = list.iter().position(|k| k == "segoe-400").map_or(0, |i| i + 1);
