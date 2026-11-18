@@ -1,5 +1,5 @@
 //! HeartBridge: reads a GEOID HS500 strap (or any standard BLE heart-rate
-//! sensor) and sends the pulse to VRChat over OSC.
+//! sensor) and publishes the pulse: to VRChat over OSC, to OBS and to any app.
 //!
 //! The window (eframe/egui) and the tray icon run on the main thread;
 //! Bluetooth and OSC run on a background tokio runtime. The window only

@@ -5,8 +5,8 @@
 <h1 align="center">HeartBridge</h1>
 
 <p align="center">
-  <b>Your heart rate in VRChat.</b><br>
-  One small app for Windows, Linux and macOS: a Bluetooth chest strap in, your pulse on your avatar, in the chatbox, on stream and in any app you write.
+  <b>Your heart rate, live, wherever you want it.</b><br>
+  One small app for Windows, Linux and macOS: a Bluetooth chest strap in; your pulse out to VRChat, to OBS and to anything you build.
 </p>
 
 <p align="center">
@@ -19,8 +19,9 @@
 
 <p align="center">
   <a href="#-quick-start">Quick start</a> ·
-  <a href="#-features">Features</a> ·
-  <a href="#-open-channel">Open channel</a> ·
+  <a href="#-vrchat">VRChat</a> ·
+  <a href="#-obs-overlay">OBS</a> ·
+  <a href="#-your-own-apps">Your own apps</a> ·
   <a href="#-troubleshooting">Troubleshooting</a> ·
   <a href="#-building-from-source">Building</a> ·
   <a href="CHANGELOG.md">Changelog</a>
@@ -28,11 +29,16 @@
 
 ---
 
-HeartBridge reads the standard Bluetooth LE Heart Rate service from a chest strap and sends it
-to VRChat over OSC. It drives avatar parameters with the same names as
-[HRtoVRChat_OSC](https://github.com/200Tigersbloxed/HRtoVRChat_OSC), so existing heart-rate
-prefabs work as they are, and it can put your BPM in the chatbox. It was made for the GEOID HS500
-and works with any strap that uses the standard service.
+HeartBridge reads the standard Bluetooth LE Heart Rate service from a chest strap and publishes
+your pulse. It comes with three ways to use it:
+
+- **VRChat**: avatar parameters with the [HRtoVRChat_OSC](https://github.com/200Tigersbloxed/HRtoVRChat_OSC)
+  names, so existing heart-rate prefabs work as they are, and your BPM in the chatbox.
+- **OBS**: an overlay you add as a browser source, with a transparent background and your own look.
+- **Your own apps**: an open channel over HTTP, WebSocket and SSE. A Discord bot, a game, smart
+  lights, a stream widget: whatever you write can read it.
+
+It was made for the GEOID HS500 and works with any strap that uses the standard service.
 
 <p align="center">
   <img src="assets/window.png" width="720" alt="HeartBridge main window">
@@ -43,13 +49,11 @@ and works with any strap that uses the standard service.
 |   |   |
 |---|---|
 | 💓 **Any standard strap** | GEOID HS500, Polar, Coospo, Wahoo and others with the Bluetooth Heart Rate service. Connects and reconnects on its own. |
-| 🧩 **HRtoVRChat parameters** | `HR`, the three digits, `floatHR` and the connected, active and beat flags. |
-| 💬 **Chatbox** | Your own text with `{bpm}`, `{zone}` and `{bat}`. Off until you turn it on. |
-| 📈 **Live view** | Large BPM, heart-rate zone, a two-minute history, strap battery and OSC status. |
+| 🎮 **VRChat** | HRtoVRChat avatar parameters and a chatbox message with your own text. |
 | 🎥 **OBS overlay** | A browser source with a transparent background, three layouts and your own colors. No window capture. |
-| 📡 **Open channel** | Your pulse over HTTP, WebSocket and SSE. Bots, games, lights, your own overlay: anything can read it. |
-| 🪟 **Compact mode** | A 300×150 window for VR overlays and window capture. |
-| 🪶 **Light** | Redraws only when new data arrives, so it stays out of VRChat's way. |
+| 📡 **Open channel** | Your pulse over HTTP, WebSocket and SSE, plus a message on every heartbeat. Any app can read it. |
+| 📈 **Live view** | Large BPM, heart-rate zone, a two-minute history and the strap's battery. |
+| 🪶 **Light** | Redraws only when new data arrives, so it stays out of your game's way. |
 
 ## 🚀 Quick start
 
@@ -111,18 +115,22 @@ On an Intel Mac, [build from source](#-building-from-source).
 Wet the electrodes and put the strap on. Most straps sleep until they feel skin contact. Within a
 few seconds the status card shows **Connected** and the number starts moving.
 
-### 3. Connect to VRChat
+### 3. Use it
 
-1. **Enable OSC in VRChat**: Action menu → Options → OSC → **Enabled**. On Linux this works the
-   same with VRChat running through Steam's Proton.
-2. **Turn on what you want** in *Send to VRChat*: avatar parameters are on by default, the
-   chatbox is off.
-3. **Load an avatar** that reads the HRtoVRChat parameters, or just watch the chatbox.
+Pick whatever you need; they all work at the same time.
 
-That's it. Closing the window keeps HeartBridge sending from the tray; **Quit** is in the tray
-menu.
+- **VRChat**: enable OSC in VRChat (Action menu → Options → OSC → **Enabled**). Avatar parameters
+  are on by default. [More](#-vrchat)
+- **OBS**: press **Open page** in the *Open channel* card, copy the overlay link and add it as a
+  Browser source. [More](#-obs-overlay)
+- **Your own app**: connect to `ws://127.0.0.1:7171/ws`. [More](#-your-own-apps)
 
-## 🧰 Features
+Closing the window keeps HeartBridge running in the tray; **Quit** is in the tray menu.
+
+## 🎮 VRChat
+
+Enable OSC in VRChat: Action menu → Options → OSC → **Enabled**. On Linux this works the same
+with VRChat running through Steam's Proton. Both switches are in the *Send to VRChat* card.
 
 <details open>
 <summary><b>Avatar parameters</b></summary>
@@ -147,40 +155,26 @@ menu.
 
 - A template where `{bpm}`, `{zone}` (Rest, Light, Moderate, Hard, Max) and `{bat}` (strap
   battery) are filled in, for example `❤ {bpm} bpm`. A live preview shows the result.
+- Off until you turn it on: everyone in the instance can read it.
 - Sent every 2 seconds, which is as fast as VRChat allows. Turning it off clears the chatbox.
 
 </details>
 
-<details open>
-<summary><b>Interface</b></summary>
+The OSC address and port are in **Settings** (`127.0.0.1:9000` by default).
 
-- A two-column window with no scrolling: the pulse and connection status on the left, the
-  VRChat switches and settings on the right.
-- Heart-rate zones based on your max heart rate (190 by default, set it in Settings).
-- **Compact mode** from the title bar: heart, number and status in 300×150, draggable from
-  anywhere, with an always-on-top option.
-- **Tray icon** that shows the live BPM. Left click shows or hides the window; right click opens
-  the parameter and chatbox switches, Open window and Quit.
-- **Open channel** card: turn it on or off, choose the address and port, copy the OBS link and
-  see how many apps are connected.
-- **Debug window** (the bug icon) with the raw packets from the strap, the parsed values, what's
-  going out over OSC and an event log you can copy.
+## 🎥 OBS overlay
 
-</details>
-
-## 📡 Open channel
-
-HeartBridge runs a small web server with your live pulse, on `http://127.0.0.1:7171` by default.
-The OBS overlay is built on it, and anything else can use it the same way.
-
-### OBS overlay
+<p align="center">
+  <img src="assets/overlay-builder.png" width="720" alt="The overlay builder: layout, colors and options on the left, a live preview and the link to copy on the right">
+</p>
 
 1. Press **Open page** in the *Open channel* card. Your browser opens the overlay builder.
 2. Pick a layout, colors and size, and press **Copy link**.
 3. In OBS: **Sources → + → Browser**, paste the link into **URL**, width 600, height 300.
 
-The background is transparent and the heart beats with your pulse. The options live in the link,
-so you can also write them by hand:
+The background is transparent and the heart beats with your pulse. **Copy OBS link** in the app
+copies the default overlay without opening the page. The options live in the link, so you can
+also write them by hand:
 
 | Option | Values | Default |
 |---|---|---|
@@ -196,7 +190,14 @@ so you can also write them by hand:
 
 For example, `http://127.0.0.1:7171/overlay?layout=inside&zonecolor=1&size=48`.
 
-### Your own apps
+For a VR overlay or a plain window capture, **compact mode** (the picture-in-picture icon in the
+title bar) shrinks the window to heart, number and status in 300×150.
+
+## 📡 Your own apps
+
+HeartBridge runs a small web server with your live pulse, the *open channel*, on
+`http://127.0.0.1:7171` by default. The OBS overlay is built on it, and anything else can use it
+the same way. The page at that address documents it with a live example.
 
 | Address | What it gives you |
 |---|---|
@@ -235,10 +236,20 @@ Every address accepts requests from any origin, so a web page hosted anywhere ca
 
 ### Address and port
 
-`127.0.0.1` means only this PC can connect. Set the address to `0.0.0.0` to let other devices on
-your network in, or to a single interface's IP. Past that, HeartBridge stays out of the way:
-put it behind Tailscale, a tunnel, a reverse proxy or a relay of your own, and send your pulse
-wherever you like.
+Both are in the *Open channel* card, which also turns the channel off. `127.0.0.1` means only
+this PC can connect. Set the address to `0.0.0.0` to let other devices on your network in, or
+to a single interface's IP. Past that, HeartBridge stays out of the way: put it behind Tailscale,
+a tunnel, a reverse proxy or a relay of your own, and send your pulse wherever you like.
+
+## 🖥️ The app
+
+- A two-column window with no scrolling: pulse, connection and the open channel on the left;
+  VRChat and settings on the right.
+- Heart-rate zones based on your max heart rate (190 by default, set it in **Settings**).
+- **Tray icon** that shows the live BPM. Left click shows or hides the window; right click opens
+  the VRChat switches, Open window and Quit.
+- **Debug window** (the bug icon) with the raw packets from the strap, the parsed values, what's
+  going out and an event log you can copy.
 
 ## 🩺 Troubleshooting
 
