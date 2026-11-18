@@ -27,6 +27,8 @@ pub enum TrayAction {
     #[cfg_attr(any(windows, target_os = "macos"), allow(dead_code))]
     ToggleChatbox,
     #[cfg_attr(any(windows, target_os = "macos"), allow(dead_code))]
+    ToggleDiscord,
+    #[cfg_attr(any(windows, target_os = "macos"), allow(dead_code))]
     Quit,
 }
 
@@ -114,11 +116,18 @@ impl Tray {
 
     /// Updates the icon and tooltip only when the BPM changes. On Linux it
     /// also keeps the menu's check marks in step with the settings.
-    pub fn update(&mut self, bpm: Option<u16>, status: &str, params: bool, chatbox: bool) {
+    pub fn update(
+        &mut self,
+        bpm: Option<u16>,
+        status: &str,
+        params: bool,
+        chatbox: bool,
+        discord: bool,
+    ) {
         #[cfg(not(any(windows, target_os = "macos")))]
-        self.menu.sync(params, chatbox);
+        self.menu.sync(params, chatbox, discord);
         #[cfg(any(windows, target_os = "macos"))]
-        let _ = (params, chatbox);
+        let _ = (params, chatbox, discord);
 
         if self.shown == Some(bpm) {
             return;
@@ -153,6 +162,7 @@ mod linux {
         pub menu: NativeMenu,
         params: CheckMenuItem,
         chatbox: CheckMenuItem,
+        discord: CheckMenuItem,
     }
 
     impl Menu {
@@ -160,6 +170,7 @@ mod linux {
             let open = MenuItem::new("Open window", true, None);
             let params = CheckMenuItem::new("Avatar parameters", true, true, None);
             let chatbox = CheckMenuItem::new("Chatbox", true, false, None);
+            let discord = CheckMenuItem::new("Discord status", true, false, None);
             let quit = MenuItem::new("Quit HeartBridge", true, None);
             let menu = NativeMenu::new();
             let _ = menu.append_items(&[
@@ -167,6 +178,7 @@ mod linux {
                 &PredefinedMenuItem::separator(),
                 &params,
                 &chatbox,
+                &discord,
                 &PredefinedMenuItem::separator(),
                 &quit,
             ]);
@@ -176,6 +188,7 @@ mod linux {
                 params.id().clone(),
                 chatbox.id().clone(),
                 quit.id().clone(),
+                discord.id().clone(),
             );
             MenuEvent::set_event_handler(Some(move |e: MenuEvent| {
                 let a = if e.id == ids.0 {
@@ -184,6 +197,8 @@ mod linux {
                     TrayAction::ToggleParams
                 } else if e.id == ids.2 {
                     TrayAction::ToggleChatbox
+                } else if e.id == ids.4 {
+                    TrayAction::ToggleDiscord
                 } else if e.id == ids.3 {
                     TrayAction::Quit
                 } else {
@@ -195,10 +210,14 @@ mod linux {
                 menu,
                 params,
                 chatbox,
+                discord,
             }
         }
 
-        pub fn sync(&self, params: bool, chatbox: bool) {
+        pub fn sync(&self, params: bool, chatbox: bool, discord: bool) {
+            if self.discord.is_checked() != discord {
+                self.discord.set_checked(discord);
+            }
             if self.params.is_checked() != params {
                 self.params.set_checked(params);
             }

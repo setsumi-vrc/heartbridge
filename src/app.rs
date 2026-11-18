@@ -11,13 +11,14 @@ use egui::{
 };
 
 use crate::config::Config;
+use crate::discord::DiscordStatus;
 use crate::hr::Zone;
 use crate::osc::render_chatbox;
 use crate::state::{Conn, HISTORY_SPAN, Shared, State};
 use crate::theme::{self, pal};
 use crate::tray::{Tray, TrayAction};
 
-pub const FULL_SIZE: [f32; 2] = [800.0, 700.0];
+pub const FULL_SIZE: [f32; 2] = [800.0, 770.0];
 pub const COMPACT_SIZE: [f32; 2] = [300.0, 150.0];
 const POPUP_W: f32 = 240.0;
 const DEBUG_SIZE: [f32; 2] = [560.0, 620.0];
@@ -143,6 +144,7 @@ impl HeartBridgeApp {
         self.shared.state().log("Settings saved");
         self.shared.config_changed.notify_one();
         self.shared.channel_config.notify_one();
+        self.shared.discord_config.notify_one();
         self.cfg.save();
         self.saved = self.cfg.clone();
     }
@@ -183,6 +185,7 @@ struct View {
     osc_error: Option<String>,
     osc_recent: bool,
     channel: crate::state::ChannelStatus,
+    discord: DiscordStatus,
 }
 
 impl View {
@@ -205,6 +208,7 @@ impl View {
                 .last_send
                 .is_some_and(|t| t.elapsed() < Duration::from_secs(7)),
             channel: s.channel.clone(),
+            discord: s.discord.clone(),
         }
     }
 
@@ -247,6 +251,7 @@ impl eframe::App for HeartBridgeApp {
                 view.summary(&self.cfg).1,
                 self.cfg.send_params,
                 self.cfg.send_chatbox,
+                self.cfg.discord_enabled,
             );
             let actions: Vec<TrayAction> = tray.events.try_iter().collect();
             for a in actions {
@@ -266,6 +271,9 @@ impl eframe::App for HeartBridgeApp {
                     TrayAction::ShowWindow => self.set_window_visible(ctx, true),
                     TrayAction::ToggleParams => self.cfg.send_params = !self.cfg.send_params,
                     TrayAction::ToggleChatbox => self.cfg.send_chatbox = !self.cfg.send_chatbox,
+                    TrayAction::ToggleDiscord => {
+                        self.cfg.discord_enabled = !self.cfg.discord_enabled
+                    }
                     TrayAction::Quit => self.quit(ctx),
                 }
             }
@@ -540,6 +548,7 @@ impl HeartBridgeApp {
                     self.channel_card(left, v);
                     slack = bottom - left.min_rect().bottom();
                     self.vrchat_card(right, v);
+                    self.discord_card(right, v);
                     self.settings_card(right);
                 });
             });
@@ -725,6 +734,27 @@ impl HeartBridgeApp {
                     .size(12.0)
                     .color(pal::TEXT_2),
             );
+        });
+    }
+
+    /// Discord Rich Presence: one switch, with what it's doing underneath.
+    fn discord_card(&mut self, ui: &mut Ui, v: &View) {
+        card(ui, |ui| {
+            let desc = if !self.cfg.discord_enabled {
+                "Your pulse on your Discord profile".to_string()
+            } else {
+                match &v.discord {
+                    DiscordStatus::Off => "Starting…".to_string(),
+                    DiscordStatus::NotRunning => "Waiting for the Discord app".to_string(),
+                    DiscordStatus::Connected(_) if v.bpm.is_none() => {
+                        "Connected · shows up with a reading".to_string()
+                    }
+                    DiscordStatus::Connected(user) => format!("On {user}'s profile"),
+                    DiscordStatus::Error(e) => format!("Error: {e}"),
+                }
+            };
+            setting_switch(ui, "Discord status", &desc, &mut self.cfg.discord_enabled)
+                .on_hover_text(DISCORD_HELP);
         });
     }
 
@@ -925,6 +955,7 @@ impl HeartBridgeApp {
                     ui.add_space(2.0);
                     menu_switch(ui, "Avatar parameters", &mut cfg.send_params);
                     menu_switch(ui, "Chatbox", &mut cfg.send_chatbox);
+                    menu_switch(ui, "Discord status", &mut cfg.discord_enabled);
                     ui.add_space(2.0);
                     separator(ui);
                     ui.add_space(2.0);
@@ -1084,6 +1115,14 @@ fn debug_ui(ui: &mut Ui, shared: &Shared, cfg: &Config) {
         (
             "OSC error",
             s.osc.error.clone().unwrap_or_else(|| "none".into()),
+        ),
+        (
+            "Discord",
+            if cfg.discord_enabled {
+                format!("{:?}", s.discord)
+            } else {
+                "off".into()
+            },
         ),
         (
             "Open channel",
@@ -1312,6 +1351,9 @@ fn field_label(ui: &mut Ui, text: &str) -> egui::Response {
     ui.label(RichText::new(text).size(13.0).color(pal::TEXT_2))
 }
 
+const DISCORD_HELP: &str = "Shows your BPM and zone on your Discord profile, through the \
+    Discord app on this PC. Everyone who can see your profile sees it. It updates about every \
+    15 seconds, which is as often as Discord allows, and disappears while there's no reading.";
 const PARAMS_HELP: &str = "HR, onesHR, tensHR, hundredsHR, floatHR, isHRConnected, isHRActive \
     and isHRBeat: the HRtoVRChat_OSC names, so existing heart-rate prefabs work.";
 const MAX_HR_HELP: &str = "The highest your heart can beat. The zones (Rest, Light, Moderate, \

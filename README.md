@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Your heart rate, live, wherever you want it.</b><br>
-  One small app for Windows, Linux and macOS: a Bluetooth chest strap in; your pulse out to VRChat, to OBS and to anything you build.
+  One small app for Windows, Linux and macOS: a Bluetooth chest strap in; your pulse out to VRChat, OBS, Discord and anything you build.
 </p>
 
 <p align="center">
@@ -21,6 +21,7 @@
   <a href="#-quick-start">Quick start</a> ·
   <a href="#-vrchat">VRChat</a> ·
   <a href="#-obs-overlay">OBS</a> ·
+  <a href="#-discord">Discord</a> ·
   <a href="#-your-own-apps">Your own apps</a> ·
   <a href="#-troubleshooting">Troubleshooting</a> ·
   <a href="#-building-from-source">Building</a> ·
@@ -30,11 +31,12 @@
 ---
 
 HeartBridge reads the standard Bluetooth LE Heart Rate service from a chest strap and publishes
-your pulse. It comes with three ways to use it:
+your pulse. It comes with four ways to use it:
 
 - **VRChat**: avatar parameters with the [HRtoVRChat_OSC](https://github.com/200Tigersbloxed/HRtoVRChat_OSC)
   names, so existing heart-rate prefabs work as they are, and your BPM in the chatbox.
 - **OBS**: an overlay you add as a browser source, with a transparent background and your own look.
+- **Discord**: your BPM and zone on your Discord profile.
 - **Your own apps**: an open channel over HTTP, WebSocket and SSE. A Discord bot, a game, smart
   lights, a stream widget: whatever you write can read it.
 
@@ -51,6 +53,7 @@ It was made for the GEOID HS500 and works with any strap that uses the standard 
 | 💓 **Any standard strap** | GEOID HS500, Polar, Coospo, Wahoo and others with the Bluetooth Heart Rate service. Connects and reconnects on its own. |
 | 🎮 **VRChat** | HRtoVRChat avatar parameters and a chatbox message with your own text. |
 | 🎥 **OBS overlay** | A browser source with a transparent background, three layouts and your own colors. No window capture. |
+| 💬 **Discord status** | Your BPM and zone on your profile, through the Discord app. Off until you turn it on. |
 | 📡 **Open channel** | Your pulse over HTTP, WebSocket and SSE, plus a message on every heartbeat. Any app can read it. |
 | 📈 **Live view** | Large BPM, heart-rate zone, a two-minute history and the strap's battery. |
 | 🪶 **Light** | Redraws only when new data arrives, so it stays out of your game's way. |
@@ -123,6 +126,7 @@ Pick whatever you need; they all work at the same time.
   are on by default. [More](#-vrchat)
 - **OBS**: press **Open page** in the *Open channel* card, copy the overlay link and add it as a
   Browser source. [More](#-obs-overlay)
+- **Discord**: turn on **Discord status** with the Discord app open. [More](#-discord)
 - **Your own app**: connect to `ws://127.0.0.1:7171/ws`. [More](#-your-own-apps)
 
 Closing the window keeps HeartBridge running in the tray; **Quit** is in the tray menu.
@@ -193,6 +197,18 @@ For example, `http://127.0.0.1:7171/overlay?layout=inside&zonecolor=1&size=48`.
 For a VR overlay or a plain window capture, **compact mode** (the picture-in-picture icon in the
 title bar) shrinks the window to heart, number and status in 300×150.
 
+## 💬 Discord
+
+Turn on **Discord status** (in the window or the tray menu) while the Discord app is running on
+the same computer. Your profile shows HeartBridge with your BPM, your zone and how long it has
+been live, and the member list shows `❤ 82 bpm`.
+
+- Off until you turn it on: everyone who can see your profile sees it.
+- Updates about every 15 seconds, as often as Discord allows.
+- Disappears while there's no reading, and when you turn it off or quit.
+- Works with the desktop app on Windows, Linux (including Flatpak and Snap) and macOS. No bot
+  or token: HeartBridge talks to the Discord app on your PC.
+
 ## 📡 Your own apps
 
 HeartBridge runs a small web server with your live pulse, the *open channel*, on
@@ -244,10 +260,10 @@ a tunnel, a reverse proxy or a relay of your own, and send your pulse wherever y
 ## 🖥️ The app
 
 - A two-column window with no scrolling: pulse, connection and the open channel on the left;
-  VRChat and settings on the right.
+  VRChat, Discord and settings on the right.
 - Heart-rate zones based on your max heart rate (190 by default, set it in **Settings**).
 - **Tray icon** that shows the live BPM. Left click shows or hides the window; right click opens
-  the VRChat switches, Open window and Quit.
+  the VRChat and Discord switches, Open window and Quit.
 - **Debug window** (the bug icon) with the raw packets from the strap, the parsed values, what's
   going out and an event log you can copy.
 

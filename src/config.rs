@@ -36,6 +36,12 @@ pub struct Config {
     pub channel_enabled: bool,
     pub channel_host: String,
     pub channel_port: u16,
+
+    /// Discord Rich Presence. Off at startup: everyone who can see your
+    /// profile sees it.
+    pub discord_enabled: bool,
+    /// Empty = HeartBridge's own Discord application.
+    pub discord_app_id: String,
 }
 
 impl Default for Config {
@@ -57,6 +63,8 @@ impl Default for Config {
             channel_enabled: true,
             channel_host: "127.0.0.1".into(),
             channel_port: 7171,
+            discord_enabled: false,
+            discord_app_id: String::new(),
         }
     }
 }

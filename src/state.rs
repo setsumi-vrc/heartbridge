@@ -56,6 +56,7 @@ pub struct State {
     pub last_beat: Option<Instant>,
     pub osc: OscStatus,
     pub channel: ChannelStatus,
+    pub discord: crate::discord::DiscordStatus,
     /// For the debug window.
     pub started: Instant,
     pub log: VecDeque<(Duration, String)>,
@@ -76,6 +77,7 @@ impl Default for State {
             last_beat: None,
             osc: OscStatus::default(),
             channel: ChannelStatus::default(),
+            discord: Default::default(),
             started: Instant::now(),
             log: VecDeque::new(),
             packets: 0,
@@ -140,6 +142,7 @@ pub struct Shared {
     pub config_changed: Arc<tokio::sync::Notify>,
     /// Same as `config_changed`, for the open channel (a `Notify` wakes one task).
     pub channel_config: Arc<tokio::sync::Notify>,
+    pub discord_config: Arc<tokio::sync::Notify>,
     pub events: tokio::sync::broadcast::Sender<Event>,
     pub ctx: egui::Context,
 }
@@ -152,6 +155,7 @@ impl Shared {
             hr_updated: Arc::new(tokio::sync::Notify::new()),
             config_changed: Arc::new(tokio::sync::Notify::new()),
             channel_config: Arc::new(tokio::sync::Notify::new()),
+            discord_config: Arc::new(tokio::sync::Notify::new()),
             events: tokio::sync::broadcast::channel(64).0,
             ctx,
         }

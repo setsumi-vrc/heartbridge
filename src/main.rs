@@ -11,6 +11,7 @@ mod app;
 mod ble;
 mod channel;
 mod config;
+mod discord;
 mod hr;
 mod icon;
 mod osc;
@@ -78,6 +79,7 @@ fn spawn_background(shared: Shared) {
             rt.block_on(async move {
                 tokio::spawn(osc::run(shared.clone()));
                 tokio::spawn(channel::run(shared.clone()));
+                tokio::spawn(discord::run(shared.clone()));
                 ble::run(shared).await;
             });
         })
