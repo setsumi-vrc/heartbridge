@@ -1,19 +1,7 @@
 {
   "detector": {
     "ignoreRules": [],
-    "ignoreFiles": [
-      ".impeccable/mocks/decision/**"
-    ],
-    "ignoreValues": [
-      {
-        "rule": "cramped-padding",
-        "value": "*",
-        "files": [
-          ".impeccable/mocks/decision/model-pick.html"
-        ],
-        "createdAt": "2026-11-18T16:42:23.803Z",
-        "reason": "Claude: throwaway decision-round sketch, not a shipping surface; the real UI is native egui"
-      }
-    ]
+    "ignoreFiles": [],
+    "ignoreValues": []
   }
 }
