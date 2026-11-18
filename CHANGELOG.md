@@ -17,6 +17,13 @@ All notable changes to HeartBridge are listed here. The format follows
 - A page at `/` that builds the overlay link with a live preview and documents the API.
 - An *Open channel* card in the window with the OBS link, a button that opens that page and the
   number of connected apps.
+- The version, and links to the GitHub repository and to X, in the title bar.
+- Tooltips that explain the avatar parameters, the max heart rate and the strap name.
+
+### Changed
+
+- Text in the window can no longer be selected by accident.
+- Removed the connection tips under the status card and the chatbox's description line.
 
 ## [0.1.0] - 2026-11-18
 

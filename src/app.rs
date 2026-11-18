@@ -23,6 +23,8 @@ const POPUP_W: f32 = 240.0;
 const DEBUG_SIZE: [f32; 2] = [560.0, 620.0];
 const TITLE_H: f32 = 44.0;
 const POPUP_TITLE: &str = "HeartBridge tray";
+const REPO_URL: &str = "https://github.com/setsumi-vrc/heartbridge";
+const X_URL: &str = "https://x.com/setsumi_vrc";
 
 const BEAT_ANIM: Duration = Duration::from_millis(260);
 const FRAME_33: Duration = Duration::from_millis(33);
@@ -75,12 +77,29 @@ pub struct HeartBridgeApp {
     chart_h: f32,
     /// When "Copy OBS link" was pressed, for the "Copied" feedback.
     copied_at: Option<Instant>,
+    /// GitHub and X marks for the title bar.
+    link_icons: [egui::TextureHandle; 2],
     quitting: bool,
+}
+
+/// A 64x64 alpha mask (from `src/icons`) as a white texture to tint.
+fn mask_texture(ctx: &egui::Context, name: &str, alpha: &[u8]) -> egui::TextureHandle {
+    let rgba: Vec<u8> = alpha.iter().flat_map(|&a| [255, 255, 255, a]).collect();
+    let image = egui::ColorImage::from_rgba_unmultiplied([64, 64], &rgba);
+    let options = egui::TextureOptions {
+        mipmap_mode: Some(egui::TextureFilter::Linear),
+        ..egui::TextureOptions::LINEAR
+    };
+    ctx.load_texture(name, image, options)
 }
 
 impl HeartBridgeApp {
     pub fn new(shared: Shared, tray: Option<Tray>) -> Self {
         let cfg = shared.config();
+        let link_icons = [
+            mask_texture(&shared.ctx, "github", include_bytes!("icons/github.a8")),
+            mask_texture(&shared.ctx, "x", include_bytes!("icons/x.a8")),
+        ];
         // Testing aids: open the popup or the debug window at startup.
         let popup =
             std::env::var_os("HEARTBRIDGE_OPEN_POPUP").map(|_| Popup::new(pos2(1100.0, 700.0)));
@@ -95,6 +114,7 @@ impl HeartBridgeApp {
             debug_open: std::env::var_os("HEARTBRIDGE_OPEN_DEBUG").is_some(),
             chart_h: 72.0,
             copied_at: None,
+            link_icons,
             quitting: false,
         }
     }
@@ -329,12 +349,19 @@ impl HeartBridgeApp {
         }
         let p = ui.painter();
         paint_heart(ui, pos2(rect.left() + 28.0, rect.center().y), 18.0, true);
-        p.text(
+        let name = p.text(
             pos2(rect.left() + 46.0, rect.center().y),
             egui::Align2::LEFT_CENTER,
             "HeartBridge",
             theme::ui_strong(14.0),
             pal::TEXT_2,
+        );
+        p.text(
+            pos2(name.right() + 8.0, rect.center().y),
+            egui::Align2::LEFT_CENTER,
+            concat!("v", env!("CARGO_PKG_VERSION")),
+            FontId::proportional(12.5),
+            pal::TEXT_DIM,
         );
 
         let mut x = rect.right();
@@ -355,6 +382,45 @@ impl HeartBridgeApp {
         if button(ui, Glyph::Debug, "Debug window").clicked() {
             self.debug_open = !self.debug_open;
         }
+
+        x -= 6.0;
+        for (tex, url) in self.link_icons.iter().zip([REPO_URL, X_URL]).rev() {
+            let r = Rect::from_min_size(pos2(x - 36.0, rect.top()), vec2(36.0, TITLE_H));
+            x -= 36.0;
+            link_button(ui, r, tex, url);
+        }
+    }
+}
+
+/// Title-bar link: a tinted mark, the address as tooltip, opens the browser.
+fn link_button(ui: &mut Ui, rect: Rect, tex: &egui::TextureHandle, url: &str) {
+    let resp = ui
+        .interact(rect, ui.scope_id().with(url), Sense::click())
+        .on_hover_cursor(egui::CursorIcon::PointingHand)
+        .on_hover_text(url);
+    resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Link, true, url));
+    if resp.clicked() {
+        open_in_browser(url);
+    }
+    let p = ui.painter();
+    if resp.hovered() {
+        p.rect_filled(rect, CornerRadius::ZERO, pal::PILL);
+    }
+    let tint = if resp.hovered() {
+        pal::TEXT
+    } else {
+        pal::TEXT_2
+    };
+    let icon = Rect::from_center_size(rect.center(), vec2(16.0, 16.0));
+    let uv = Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0));
+    p.image(tex.id(), icon, uv, tint);
+    if resp.has_focus() {
+        p.rect_stroke(
+            rect.shrink(2.0),
+            CornerRadius::same(4),
+            Stroke::new(2.0, pal::FOCUS),
+            egui::StrokeKind::Inside,
+        );
     }
 }
 
@@ -541,11 +607,6 @@ impl HeartBridgeApp {
                 (pal::TEXT_DIM, format!("Waiting · {dest}"))
             };
             status_row(ui, "VRChat", Some(dot), &text);
-
-            if let Some(hint) = connection_hint(v) {
-                ui.add_space(2.0);
-                ui.label(RichText::new(hint).size(13.0).color(pal::TEXT_2));
-            }
         });
     }
 
@@ -633,18 +694,9 @@ impl HeartBridgeApp {
                     .font(theme::ui_strong(17.0))
                     .color(pal::TEXT),
             );
-            setting_switch(
-                ui,
-                "Avatar parameters",
-                "HRtoVRChat set: HR, floatHR, isHRBeat…",
-                &mut self.cfg.send_params,
-            );
-            setting_switch(
-                ui,
-                "Chatbox",
-                "Everyone in the instance can see it",
-                &mut self.cfg.send_chatbox,
-            );
+            setting_switch(ui, "Avatar parameters", "", &mut self.cfg.send_params)
+                .on_hover_text(PARAMS_HELP);
+            setting_switch(ui, "Chatbox", "", &mut self.cfg.send_chatbox);
 
             ui.add_space(2.0);
             ui.label(RichText::new("Chatbox text").size(13.0).color(pal::TEXT_2));
@@ -702,7 +754,7 @@ impl HeartBridgeApp {
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
                     ui.spacing_mut().item_spacing.y = 10.0;
-                    field_label(ui, "Max heart rate (zones)");
+                    field_label(ui, "Max heart rate (zones)").on_hover_text(MAX_HR_HELP);
                     ui.horizontal(|ui| {
                         number_field(ui, "max-hr", &mut self.cfg.max_hr, 120..=230, 64.0);
                         ui.label(RichText::new("bpm").size(13.0).color(pal::TEXT_2));
@@ -711,7 +763,7 @@ impl HeartBridgeApp {
                 ui.add_space(8.0);
                 ui.vertical(|ui| {
                     ui.spacing_mut().item_spacing.y = 10.0;
-                    field_label(ui, "Strap name");
+                    field_label(ui, "Strap name").on_hover_text(STRAP_NAME_HELP);
                     ui.add(
                         egui::TextEdit::singleline(&mut self.cfg.name_filter)
                             .font(FontId::proportional(15.0))
@@ -1128,17 +1180,6 @@ fn disable_open_animation(title: &str) {
 #[cfg(not(windows))]
 fn disable_open_animation(_title: &str) {}
 
-fn connection_hint(v: &View) -> Option<&'static str> {
-    match &v.conn {
-        Conn::NoAdapter(_) => Some("Turn on the PC's Bluetooth or plug in an adapter."),
-        Conn::Searching => Some(
-            "Put the strap on and wet the electrodes to wake it. If it's connected to your phone, close that app: it only accepts one connection.",
-        ),
-        Conn::Connected(_) if v.bpm.is_none() => Some("Tighten the strap and wet the electrodes."),
-        _ => None,
-    }
-}
-
 // ---------------------------------------------------------------- widgets
 
 fn status_row(ui: &mut Ui, label: &str, dot: Option<Color32>, value: &str) {
@@ -1266,10 +1307,19 @@ fn menu_switch(ui: &mut Ui, title: &str, on: &mut bool) {
     }
 }
 
-fn field_label(ui: &mut Ui, text: &str) {
+fn field_label(ui: &mut Ui, text: &str) -> egui::Response {
     ui.add_space(2.0);
-    ui.label(RichText::new(text).size(13.0).color(pal::TEXT_2));
+    ui.label(RichText::new(text).size(13.0).color(pal::TEXT_2))
 }
+
+const PARAMS_HELP: &str = "HR, onesHR, tensHR, hundredsHR, floatHR, isHRConnected, isHRActive \
+    and isHRBeat: the HRtoVRChat_OSC names, so existing heart-rate prefabs work.";
+const MAX_HR_HELP: &str = "The highest your heart can beat. The zones (Rest, Light, Moderate, \
+    Hard, Max) are percentages of it, from under 60% to over 90%. Without a measured value, \
+    220 minus your age is a common estimate.";
+const STRAP_NAME_HELP: &str = "Only connect to a strap whose Bluetooth name contains this text. \
+    Leave it empty to use the first heart-rate sensor found; fill it in when there's more than \
+    one strap nearby or yours isn't found.";
 
 fn zone_pill(ui: &mut Ui, zone: Zone) {
     let color = pal::ZONES[zone as usize];
@@ -1288,14 +1338,17 @@ fn zone_pill(ui: &mut Ui, zone: Zone) {
     );
 }
 
-/// Title + description on the left, switch on the right. The whole row toggles.
-fn setting_switch(ui: &mut Ui, title: &str, desc: &str, on: &mut bool) {
+/// Title (and a description, if any) on the left, switch on the right.
+/// The whole row toggles.
+fn setting_switch(ui: &mut Ui, title: &str, desc: &str, on: &mut bool) -> egui::Response {
     let row = ui.horizontal(|ui| {
         ui.vertical(|ui| {
             ui.set_max_width(ui.available_width() - 60.0);
             ui.spacing_mut().item_spacing.y = 2.0;
             ui.label(RichText::new(title).size(15.0).color(pal::TEXT));
-            ui.label(RichText::new(desc).size(12.5).color(pal::TEXT_2));
+            if !desc.is_empty() {
+                ui.label(RichText::new(desc).size(12.5).color(pal::TEXT_2));
+            }
         });
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             switch(ui, on, title)
@@ -1309,6 +1362,7 @@ fn setting_switch(ui: &mut Ui, title: &str, desc: &str, on: &mut bool) {
     if resp.clicked() {
         *on = !*on;
     }
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
 fn switch(ui: &mut Ui, on: &mut bool, label: &str) -> egui::Response {

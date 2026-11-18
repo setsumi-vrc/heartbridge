@@ -216,6 +216,8 @@ pub fn install(ctx: &egui::Context) {
     ctx.set_theme(egui::Theme::Dark);
     ctx.set_visuals_of(egui::Theme::Dark, v);
     ctx.style_mut_of(egui::Theme::Dark, |s| {
+        // Labels are text, not documents: no selection and no text cursor.
+        s.interaction.selectable_labels = false;
         s.spacing.button_padding = egui::vec2(12.0, 7.0);
         s.spacing.interact_size.y = 30.0;
     });
