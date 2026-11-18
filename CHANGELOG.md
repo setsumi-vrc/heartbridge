@@ -4,7 +4,7 @@ All notable changes to HeartBridge are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.2.0] - 2026-11-18
 
 ### Added
 
@@ -45,5 +45,5 @@ First release.
 - Debug window with the raw strap packets, the OSC state and a copyable event log.
 - Windows, Linux (X11 and Wayland) and macOS builds.
 
-[Unreleased]: https://github.com/setsumi-vrc/heartbridge/compare/v0.1.0...HEAD
+[0.2.0]: https://github.com/setsumi-vrc/heartbridge/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/setsumi-vrc/heartbridge/releases/tag/v0.1.0

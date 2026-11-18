@@ -1,6 +1,6 @@
 [package]
 name = "heartbridge"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.95"
 description = "Heart rate from a Bluetooth LE chest strap to VRChat, OBS and your own apps"
