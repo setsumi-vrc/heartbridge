@@ -93,8 +93,13 @@ impl State {
         if !matches!(self.conn, Conn::Connected(_)) {
             return None;
         }
-        let fresh = self.last_hr_at.is_some_and(|t| t.elapsed() < Duration::from_secs(5));
-        self.hr.as_ref().filter(|h| fresh && h.is_reading()).map(|h| h.bpm)
+        let fresh = self
+            .last_hr_at
+            .is_some_and(|t| t.elapsed() < Duration::from_secs(5));
+        self.hr
+            .as_ref()
+            .filter(|h| fresh && h.is_reading())
+            .map(|h| h.bpm)
     }
 
     pub fn disconnect(&mut self) {
@@ -131,6 +136,9 @@ impl Shared {
     }
 
     pub fn config(&self) -> Config {
-        self.config.lock().unwrap_or_else(|e| e.into_inner()).clone()
+        self.config
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
     }
 }

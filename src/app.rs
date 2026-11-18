@@ -5,9 +5,9 @@
 use std::time::{Duration, Instant};
 
 use egui::{
-    Align, Color32, CornerRadius, FontId, Layout, Margin, Pos2, Rect, RichText, Sense, Shape,
-    Stroke, Ui, ViewportCommand, ViewportId, epaint::Mesh, epaint::PathShape, pos2, vec2,
-    Align2, WidgetInfo,
+    Align, Align2, Color32, CornerRadius, FontId, Layout, Margin, Pos2, Rect, RichText, Sense,
+    Shape, Stroke, Ui, ViewportCommand, ViewportId, WidgetInfo, epaint::Mesh, epaint::PathShape,
+    pos2, vec2,
 };
 
 use crate::config::Config;
@@ -40,14 +40,23 @@ struct Popup {
 
 impl Popup {
     fn new(anchor: Pos2) -> Self {
-        Self { opened: Instant::now(), anchor, had_focus: false, shown: false }
+        Self {
+            opened: Instant::now(),
+            anchor,
+            had_focus: false,
+            shown: false,
+        }
     }
 
     /// Above the click when there's room (Windows taskbar at the bottom),
     /// below it otherwise (macOS menu bar at the top).
     fn pos(&self, h: f32) -> Pos2 {
         let x = (self.anchor.x - POPUP_W + 8.0).max(0.0);
-        let y = if self.anchor.y - h - 8.0 >= 0.0 { self.anchor.y - h - 8.0 } else { self.anchor.y + 8.0 };
+        let y = if self.anchor.y - h - 8.0 >= 0.0 {
+            self.anchor.y - h - 8.0
+        } else {
+            self.anchor.y + 8.0
+        };
         pos2(x, y)
     }
 }
@@ -71,7 +80,8 @@ impl HeartBridgeApp {
     pub fn new(shared: Shared, tray: Option<Tray>) -> Self {
         let cfg = shared.config();
         // Testing aids: open the popup or the debug window at startup.
-        let popup = std::env::var_os("HEARTBRIDGE_OPEN_POPUP").map(|_| Popup::new(pos2(1100.0, 700.0)));
+        let popup =
+            std::env::var_os("HEARTBRIDGE_OPEN_POPUP").map(|_| Popup::new(pos2(1100.0, 700.0)));
         Self {
             shared,
             saved: cfg.clone(),
@@ -99,7 +109,11 @@ impl HeartBridgeApp {
             ctx.send_viewport_cmd_to(ViewportId::ROOT, ViewportCommand::WindowLevel(level));
         }
         if self.cfg.compact != self.saved.compact {
-            let size = if self.cfg.compact { COMPACT_SIZE } else { FULL_SIZE };
+            let size = if self.cfg.compact {
+                COMPACT_SIZE
+            } else {
+                FULL_SIZE
+            };
             ctx.send_viewport_cmd_to(ViewportId::ROOT, ViewportCommand::InnerSize(size.into()));
         }
         *self.shared.config.lock().unwrap_or_else(|e| e.into_inner()) = self.cfg.clone();
@@ -161,7 +175,10 @@ impl View {
                 .map(|(t, b)| (now.duration_since(*t).as_secs_f32(), *b))
                 .collect(),
             osc_error: s.osc.error.clone(),
-            osc_recent: s.osc.last_send.is_some_and(|t| t.elapsed() < Duration::from_secs(7)),
+            osc_recent: s
+                .osc
+                .last_send
+                .is_some_and(|t| t.elapsed() < Duration::from_secs(7)),
         }
     }
 
@@ -199,7 +216,12 @@ impl eframe::App for HeartBridgeApp {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let view = View::capture(&self.shared.state());
         if let Some(tray) = &mut self.tray {
-            tray.update(view.bpm, view.summary(&self.cfg).1, self.cfg.send_params, self.cfg.send_chatbox);
+            tray.update(
+                view.bpm,
+                view.summary(&self.cfg).1,
+                self.cfg.send_params,
+                self.cfg.send_chatbox,
+            );
             let actions: Vec<TrayAction> = tray.events.try_iter().collect();
             for a in actions {
                 match a {
@@ -210,7 +232,9 @@ impl eframe::App for HeartBridgeApp {
                         self.set_window_visible(ctx, show);
                     }
                     TrayAction::OpenPopup { x, y } => {
-                        let ppp = ctx.input(|i| i.viewport().native_pixels_per_point).unwrap_or(1.0);
+                        let ppp = ctx
+                            .input(|i| i.viewport().native_pixels_per_point)
+                            .unwrap_or(1.0);
                         self.popup = Some(Popup::new(pos2(x as f32 / ppp, y as f32 / ppp)));
                     }
                     TrayAction::ShowWindow => self.set_window_visible(ctx, true),
@@ -334,10 +358,18 @@ fn title_button(ui: &mut Ui, rect: Rect, glyph: Glyph, tip: &str) -> egui::Respo
     resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tip));
     let p = ui.painter();
     if resp.hovered() {
-        let fill = if matches!(glyph, Glyph::Close) { pal::CLOSE_HOVER } else { pal::PILL };
+        let fill = if matches!(glyph, Glyph::Close) {
+            pal::CLOSE_HOVER
+        } else {
+            pal::PILL
+        };
         p.rect_filled(rect, CornerRadius::ZERO, fill);
     }
-    let color = if resp.hovered() { pal::TEXT } else { pal::TEXT_2 };
+    let color = if resp.hovered() {
+        pal::TEXT
+    } else {
+        pal::TEXT_2
+    };
     let s = Stroke::new(1.3, color);
     let c = rect.center();
     match glyph {
@@ -366,15 +398,32 @@ fn title_button(ui: &mut Ui, rect: Rect, glyph: Glyph, tip: &str) -> egui::Respo
             p.line_segment([pos2(c.x, c.y - 1.0), pos2(c.x, c.y + 6.5)], s);
             p.line_segment([pos2(c.x - 2.5, c.y - 3.5), pos2(c.x + 2.5, c.y - 3.5)], s);
             for (dy, dx) in [(-1.0, 2.5), (2.0, 3.0), (5.0, 2.5)] {
-                p.line_segment([pos2(c.x - 4.0, c.y + dy), pos2(c.x - 4.0 - dx, c.y + dy - 0.5)], s);
-                p.line_segment([pos2(c.x + 4.0, c.y + dy), pos2(c.x + 4.0 + dx, c.y + dy - 0.5)], s);
+                p.line_segment(
+                    [
+                        pos2(c.x - 4.0, c.y + dy),
+                        pos2(c.x - 4.0 - dx, c.y + dy - 0.5),
+                    ],
+                    s,
+                );
+                p.line_segment(
+                    [
+                        pos2(c.x + 4.0, c.y + dy),
+                        pos2(c.x + 4.0 + dx, c.y + dy - 0.5),
+                    ],
+                    s,
+                );
             }
             p.line_segment([pos2(c.x - 1.5, c.y - 3.5), pos2(c.x - 3.5, c.y - 6.0)], s);
             p.line_segment([pos2(c.x + 1.5, c.y - 3.5), pos2(c.x + 3.5, c.y - 6.0)], s);
         }
     }
     if resp.has_focus() {
-        p.rect_stroke(rect.shrink(2.0), CornerRadius::same(4), Stroke::new(2.0, pal::FOCUS), egui::StrokeKind::Inside);
+        p.rect_stroke(
+            rect.shrink(2.0),
+            CornerRadius::same(4),
+            Stroke::new(2.0, pal::FOCUS),
+            egui::StrokeKind::Inside,
+        );
     }
     resp
 }
@@ -401,19 +450,26 @@ impl HeartBridgeApp {
     fn columns(&mut self, ui: &mut Ui, v: &View) -> bool {
         let mut animating = false;
         let mut slack = 0.0;
-        egui::Frame::new().inner_margin(Margin { left: 16, right: 16, top: 4, bottom: 16 }).show(ui, |ui| {
-            ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
-            ui.columns_const(|[left, right]| {
-                left.spacing_mut().item_spacing = vec2(0.0, 12.0);
-                right.spacing_mut().item_spacing = vec2(0.0, 12.0);
-                let bottom = left.max_rect().bottom();
-                animating = self.pulse_card(left, v);
-                self.status_card(left, v);
-                slack = bottom - left.min_rect().bottom();
-                self.vrchat_card(right, v);
-                self.settings_card(right);
+        egui::Frame::new()
+            .inner_margin(Margin {
+                left: 16,
+                right: 16,
+                top: 4,
+                bottom: 16,
+            })
+            .show(ui, |ui| {
+                ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
+                ui.columns_const(|[left, right]| {
+                    left.spacing_mut().item_spacing = vec2(0.0, 12.0);
+                    right.spacing_mut().item_spacing = vec2(0.0, 12.0);
+                    let bottom = left.max_rect().bottom();
+                    animating = self.pulse_card(left, v);
+                    self.status_card(left, v);
+                    slack = bottom - left.min_rect().bottom();
+                    self.vrchat_card(right, v);
+                    self.settings_card(right);
+                });
             });
-        });
         let target = (self.chart_h + slack).clamp(56.0, 320.0);
         if (target - self.chart_h).abs() > 0.5 {
             self.chart_h = target;
@@ -457,7 +513,10 @@ impl HeartBridgeApp {
             };
             status_row(ui, "Strap", Some(dot), &text);
 
-            let bat = v.battery.map(|b| format!("{b}%")).unwrap_or_else(|| "—".into());
+            let bat = v
+                .battery
+                .map(|b| format!("{b}%"))
+                .unwrap_or_else(|| "—".into());
             let bat_dot = match v.battery {
                 Some(b) if b <= 15 => Some(pal::WARN),
                 _ => None,
@@ -485,7 +544,11 @@ impl HeartBridgeApp {
 
     fn vrchat_card(&mut self, ui: &mut Ui, v: &View) {
         card(ui, |ui| {
-            ui.label(RichText::new("Send to VRChat").font(theme::ui_strong(17.0)).color(pal::TEXT));
+            ui.label(
+                RichText::new("Send to VRChat")
+                    .font(theme::ui_strong(17.0))
+                    .color(pal::TEXT),
+            );
             setting_switch(
                 ui,
                 "Avatar parameters",
@@ -533,7 +596,11 @@ impl HeartBridgeApp {
         card(ui, |ui| {
             // Fills down to the bottom of the window.
             ui.set_min_height(ui.available_height() - 19.0);
-            ui.label(RichText::new("Settings").font(theme::ui_strong(17.0)).color(pal::TEXT));
+            ui.label(
+                RichText::new("Settings")
+                    .font(theme::ui_strong(17.0))
+                    .color(pal::TEXT),
+            );
 
             field_label(ui, "VRChat OSC address");
             ui.horizontal(|ui| {
@@ -571,8 +638,18 @@ impl HeartBridgeApp {
                 });
             });
             ui.add_space(2.0);
-            setting_switch(ui, "Always on top", "Stays above other windows", &mut self.cfg.always_on_top);
-            setting_switch(ui, "Animate the heartbeat", "Turn off to use even less", &mut self.cfg.animate_beat);
+            setting_switch(
+                ui,
+                "Always on top",
+                "Stays above other windows",
+                &mut self.cfg.always_on_top,
+            );
+            setting_switch(
+                ui,
+                "Animate the heartbeat",
+                "Turn off to use even less",
+                &mut self.cfg.animate_beat,
+            );
         });
     }
 
@@ -580,30 +657,41 @@ impl HeartBridgeApp {
     /// The whole window drags; the controls appear on hover.
     fn compact_ui(&mut self, ui: &mut Ui, v: &View) -> bool {
         let full = ui.max_rect();
-        let drag = ui.interact(full, ui.scope_id().with("compact-drag"), Sense::click_and_drag());
+        let drag = ui.interact(
+            full,
+            ui.scope_id().with("compact-drag"),
+            Sense::click_and_drag(),
+        );
         if drag.drag_started() {
             ui.ctx().send_viewport_cmd(ViewportCommand::StartDrag);
         }
         let hovering = ui.rect_contains_pointer(full);
 
         let mut animating = false;
-        egui::Frame::new().inner_margin(Margin { left: 16, right: 16, top: 14, bottom: 12 }).show(ui, |ui| {
-            ui.set_width(ui.available_width());
-            ui.horizontal(|ui| {
-                let (scale, anim) = beat_scale(v, self.cfg.animate_beat);
-                animating = anim;
-                let (rect, _) = ui.allocate_exact_size(vec2(56.0, 76.0), Sense::hover());
-                paint_heart(ui, rect.center(), 48.0 * scale, v.bpm.is_some());
-                ui.add_space(4.0);
-                bpm_label(ui, v.bpm, 76.0);
+        egui::Frame::new()
+            .inner_margin(Margin {
+                left: 16,
+                right: 16,
+                top: 14,
+                bottom: 12,
+            })
+            .show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.horizontal(|ui| {
+                    let (scale, anim) = beat_scale(v, self.cfg.animate_beat);
+                    animating = anim;
+                    let (rect, _) = ui.allocate_exact_size(vec2(56.0, 76.0), Sense::hover());
+                    paint_heart(ui, rect.center(), 48.0 * scale, v.bpm.is_some());
+                    ui.add_space(4.0);
+                    bpm_label(ui, v.bpm, 76.0);
+                });
+                // Read from a distance in VR and on stream: larger dot and text.
+                let (dot, text) = v.summary(&self.cfg);
+                ui.horizontal(|ui| {
+                    dot_widget(ui, dot, 12.0);
+                    ui.label(RichText::new(text).size(16.0).color(pal::TEXT));
+                });
             });
-            // Read from a distance in VR and on stream: larger dot and text.
-            let (dot, text) = v.summary(&self.cfg);
-            ui.horizontal(|ui| {
-                dot_widget(ui, dot, 12.0);
-                ui.label(RichText::new(text).size(16.0).color(pal::TEXT));
-            });
-        });
 
         if hovering {
             let r1 = Rect::from_min_size(pos2(full.right() - 36.0, full.top()), vec2(36.0, 32.0));
@@ -622,7 +710,9 @@ impl HeartBridgeApp {
     /// Created hidden, measured and placed on its first frame, then shown
     /// without the Windows open animation so it appears at once.
     fn show_popup(&mut self, ctx: &egui::Context, v: &View) -> bool {
-        let Some(popup) = &self.popup else { return false };
+        let Some(popup) = &self.popup else {
+            return false;
+        };
         let builder = egui::ViewportBuilder::default()
             .with_title(POPUP_TITLE)
             .with_decorations(false)
@@ -663,47 +753,59 @@ impl HeartBridgeApp {
             }
 
             let full = ui.max_rect();
-            ui.painter().rect_filled(full, CornerRadius::ZERO, pal::CARD);
-            ui.painter().rect_stroke(full, CornerRadius::ZERO, Stroke::new(1.0, pal::HAIRLINE), egui::StrokeKind::Inside);
+            ui.painter()
+                .rect_filled(full, CornerRadius::ZERO, pal::CARD);
+            ui.painter().rect_stroke(
+                full,
+                CornerRadius::ZERO,
+                Stroke::new(1.0, pal::HAIRLINE),
+                egui::StrokeKind::Inside,
+            );
 
-            let inner = egui::Frame::new().inner_margin(Margin::symmetric(8, 10)).show(ui, |ui| {
-                ui.set_width(ui.available_width());
-                ui.spacing_mut().item_spacing = vec2(6.0, 4.0);
-                egui::Frame::new().inner_margin(Margin::symmetric(8, 2)).show(ui, |ui| {
-                    ui.horizontal(|ui| {
-                        let (scale, anim) = beat_scale(v, cfg.animate_beat);
-                        animating = anim;
-                        let (rect, _) = ui.allocate_exact_size(vec2(30.0, 34.0), Sense::hover());
-                        paint_heart(ui, rect.center(), 24.0 * scale, v.bpm.is_some());
-                        bpm_label(ui, v.bpm, 36.0);
-                    });
-                    let (dot, text) = v.summary(cfg);
-                    ui.horizontal(|ui| {
-                        dot_widget(ui, dot, 7.0);
-                        ui.label(RichText::new(text).size(12.5).color(pal::TEXT_2));
-                    });
+            let inner = egui::Frame::new()
+                .inner_margin(Margin::symmetric(8, 10))
+                .show(ui, |ui| {
+                    ui.set_width(ui.available_width());
+                    ui.spacing_mut().item_spacing = vec2(6.0, 4.0);
+                    egui::Frame::new()
+                        .inner_margin(Margin::symmetric(8, 2))
+                        .show(ui, |ui| {
+                            ui.horizontal(|ui| {
+                                let (scale, anim) = beat_scale(v, cfg.animate_beat);
+                                animating = anim;
+                                let (rect, _) =
+                                    ui.allocate_exact_size(vec2(30.0, 34.0), Sense::hover());
+                                paint_heart(ui, rect.center(), 24.0 * scale, v.bpm.is_some());
+                                bpm_label(ui, v.bpm, 36.0);
+                            });
+                            let (dot, text) = v.summary(cfg);
+                            ui.horizontal(|ui| {
+                                dot_widget(ui, dot, 7.0);
+                                ui.label(RichText::new(text).size(12.5).color(pal::TEXT_2));
+                            });
+                        });
+                    ui.add_space(4.0);
+                    separator(ui);
+                    ui.add_space(2.0);
+                    menu_switch(ui, "Avatar parameters", &mut cfg.send_params);
+                    menu_switch(ui, "Chatbox", &mut cfg.send_chatbox);
+                    ui.add_space(2.0);
+                    separator(ui);
+                    ui.add_space(2.0);
+                    if menu_item(ui, "Open window").clicked() {
+                        open_window = true;
+                    }
+                    if menu_item(ui, "Quit HeartBridge").clicked() {
+                        quit = true;
+                    }
                 });
-                ui.add_space(4.0);
-                separator(ui);
-                ui.add_space(2.0);
-                menu_switch(ui, "Avatar parameters", &mut cfg.send_params);
-                menu_switch(ui, "Chatbox", &mut cfg.send_chatbox);
-                ui.add_space(2.0);
-                separator(ui);
-                ui.add_space(2.0);
-                if menu_item(ui, "Open window").clicked() {
-                    open_window = true;
-                }
-                if menu_item(ui, "Quit HeartBridge").clicked() {
-                    quit = true;
-                }
-            });
             measured = inner.response.rect.height().ceil();
 
             if !shown {
                 // First frame, still hidden: fit the height, turn off the
                 // fade-in, then show it.
-                ui.ctx().send_viewport_cmd(ViewportCommand::InnerSize(vec2(POPUP_W, measured)));
+                ui.ctx()
+                    .send_viewport_cmd(ViewportCommand::InnerSize(vec2(POPUP_W, measured)));
                 disable_open_animation(POPUP_TITLE);
                 ui.ctx().send_viewport_cmd(ViewportCommand::Visible(true));
                 ui.ctx().send_viewport_cmd(ViewportCommand::Focus);
@@ -718,7 +820,9 @@ impl HeartBridgeApp {
                 ctx.send_viewport_cmd_to(popup_id, ViewportCommand::OuterPosition(pos));
                 p.shown = true;
                 let ms = p.opened.elapsed().as_millis();
-                self.shared.state().log(format!("Tray popup ready in {ms} ms"));
+                self.shared
+                    .state()
+                    .log(format!("Tray popup ready in {ms} ms"));
             }
         }
         self.popup_h = measured;
@@ -758,10 +862,14 @@ impl HeartBridgeApp {
                 close = true;
             }
             let all = ui.ctx().content_rect();
-            ui.ctx().layer_painter(egui::LayerId::background()).rect_filled(all, CornerRadius::ZERO, pal::GROUND);
-            egui::Frame::new().inner_margin(Margin::same(16)).show(ui, |ui| {
-                debug_ui(ui, &shared, &cfg);
-            });
+            ui.ctx()
+                .layer_painter(egui::LayerId::background())
+                .rect_filled(all, CornerRadius::ZERO, pal::GROUND);
+            egui::Frame::new()
+                .inner_margin(Margin::same(16))
+                .show(ui, |ui| {
+                    debug_ui(ui, &shared, &cfg);
+                });
         });
         if close {
             self.debug_open = false;
@@ -776,14 +884,24 @@ fn debug_ui(ui: &mut Ui, shared: &Shared, cfg: &Config) {
         Some(t) => format!("{:.1} s ago", now.duration_since(t).as_secs_f32()),
         None => "never".into(),
     };
-    let mono = |t: String| RichText::new(t).font(FontId::monospace(12.5)).color(pal::TEXT);
+    let mono = |t: String| {
+        RichText::new(t)
+            .font(FontId::monospace(12.5))
+            .color(pal::TEXT)
+    };
 
     let rows: Vec<(&str, String)> = vec![
-        ("Uptime", format!("{:.0} s", s.started.elapsed().as_secs_f32())),
+        (
+            "Uptime",
+            format!("{:.0} s", s.started.elapsed().as_secs_f32()),
+        ),
         ("Connection", format!("{:?}", s.conn)),
         ("Battery", s.battery.map_or("—".into(), |b| format!("{b}%"))),
         ("Packets", s.packets.to_string()),
-        ("Last packet", format!("{} · {:02X?}", ago(s.last_hr_at), s.last_packet)),
+        (
+            "Last packet",
+            format!("{} · {:02X?}", ago(s.last_hr_at), s.last_packet),
+        ),
         (
             "Parsed",
             match &s.hr {
@@ -794,35 +912,70 @@ fn debug_ui(ui: &mut Ui, shared: &Shared, cfg: &Config) {
                         None => "not reported",
                     };
                     let rr: Vec<String> = h.rr_ms.iter().map(|r| format!("{r:.0}")).collect();
-                    let rr = if rr.is_empty() { "—".to_string() } else { format!("{} ms", rr.join(", ")) };
+                    let rr = if rr.is_empty() {
+                        "—".to_string()
+                    } else {
+                        format!("{} ms", rr.join(", "))
+                    };
                     let energy = h.energy_kj.map_or("—".into(), |e| format!("{e} kJ"));
-                    format!("{} bpm · contact {contact} · RR {rr} · energy {energy}", h.bpm)
+                    format!(
+                        "{} bpm · contact {contact} · RR {rr} · energy {energy}",
+                        h.bpm
+                    )
                 }
                 None => "—".into(),
             },
         ),
-        ("Live BPM", s.live_bpm().map_or("— (none or stale)".into(), |b| b.to_string())),
+        (
+            "Live BPM",
+            s.live_bpm()
+                .map_or("— (none or stale)".into(), |b| b.to_string()),
+        ),
         ("OSC target", format!("{}:{}", cfg.osc_host, cfg.osc_port)),
-        ("OSC sends", format!("params {} · chatbox {}", cfg.send_params, cfg.send_chatbox)),
+        (
+            "OSC sends",
+            format!("params {} · chatbox {}", cfg.send_params, cfg.send_chatbox),
+        ),
         ("Last send", ago(s.osc.last_send)),
-        ("Last chatbox", format!("{} · \"{}\"", ago(s.osc.last_chatbox), s.osc.last_chatbox_text)),
-        ("OSC error", s.osc.error.clone().unwrap_or_else(|| "none".into())),
+        (
+            "Last chatbox",
+            format!(
+                "{} · \"{}\"",
+                ago(s.osc.last_chatbox),
+                s.osc.last_chatbox_text
+            ),
+        ),
+        (
+            "OSC error",
+            s.osc.error.clone().unwrap_or_else(|| "none".into()),
+        ),
     ];
 
-    ui.label(RichText::new("State").font(theme::ui_strong(15.0)).color(pal::TEXT));
-    egui::Grid::new("debug-state").num_columns(2).spacing(vec2(16.0, 6.0)).show(ui, |ui| {
-        for (k, v) in rows {
-            ui.label(RichText::new(k).size(13.0).color(pal::TEXT_2));
-            ui.add(egui::Label::new(mono(v)).wrap());
-            ui.end_row();
-        }
-    });
+    ui.label(
+        RichText::new("State")
+            .font(theme::ui_strong(15.0))
+            .color(pal::TEXT),
+    );
+    egui::Grid::new("debug-state")
+        .num_columns(2)
+        .spacing(vec2(16.0, 6.0))
+        .show(ui, |ui| {
+            for (k, v) in rows {
+                ui.label(RichText::new(k).size(13.0).color(pal::TEXT_2));
+                ui.add(egui::Label::new(mono(v)).wrap());
+                ui.end_row();
+            }
+        });
 
     ui.add_space(12.0);
     let mut copy = false;
     let mut clear = false;
     ui.horizontal(|ui| {
-        ui.label(RichText::new("Log").font(theme::ui_strong(15.0)).color(pal::TEXT));
+        ui.label(
+            RichText::new("Log")
+                .font(theme::ui_strong(15.0))
+                .color(pal::TEXT),
+        );
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             clear = ui.button(RichText::new("Clear").size(13.0)).clicked();
             copy = ui.button(RichText::new("Copy log").size(13.0)).clicked();
@@ -842,14 +995,17 @@ fn debug_ui(ui: &mut Ui, shared: &Shared, cfg: &Config) {
         .corner_radius(CornerRadius::same(10))
         .inner_margin(Margin::same(10))
         .show(ui, |ui| {
-            egui::ScrollArea::vertical().auto_shrink(false).stick_to_bottom(true).show(ui, |ui| {
-                if s.log.is_empty() {
-                    ui.label(RichText::new("No events yet").size(13.0).color(pal::TEXT_2));
-                }
-                for line in &s.log {
-                    ui.label(mono(fmt(line)));
-                }
-            });
+            egui::ScrollArea::vertical()
+                .auto_shrink(false)
+                .stick_to_bottom(true)
+                .show(ui, |ui| {
+                    if s.log.is_empty() {
+                        ui.label(RichText::new("No events yet").size(13.0).color(pal::TEXT_2));
+                    }
+                    for line in &s.log {
+                        ui.label(mono(fmt(line)));
+                    }
+                });
         });
 }
 
@@ -857,7 +1013,9 @@ fn debug_ui(ui: &mut Ui, shared: &Shared, cfg: &Config) {
 /// found by its title. Without it Windows fades the popup in.
 #[cfg(windows)]
 fn disable_open_animation(title: &str) {
-    use windows_sys::Win32::Graphics::Dwm::{DWMWA_TRANSITIONS_FORCEDISABLED, DwmSetWindowAttribute};
+    use windows_sys::Win32::Graphics::Dwm::{
+        DWMWA_TRANSITIONS_FORCEDISABLED, DwmSetWindowAttribute,
+    };
     use windows_sys::Win32::UI::WindowsAndMessaging::FindWindowW;
     let wide: Vec<u16> = title.encode_utf16().chain(std::iter::once(0)).collect();
     // SAFETY: valid null-terminated UTF-16 title; the attribute is a BOOL (i32).
@@ -910,9 +1068,17 @@ fn dot_widget(ui: &mut Ui, color: Color32, size: f32) {
 
 /// Number entry drawn like the text fields. Applies valid values as you
 /// type and clamps to the range when focus leaves.
-fn number_field(ui: &mut Ui, key: &str, value: &mut u16, range: std::ops::RangeInclusive<u16>, width: f32) {
+fn number_field(
+    ui: &mut Ui,
+    key: &str,
+    value: &mut u16,
+    range: std::ops::RangeInclusive<u16>,
+    width: f32,
+) {
     let id = ui.make_persistent_id(key);
-    let mut text = ui.data_mut(|d| d.get_temp::<String>(id)).unwrap_or_else(|| value.to_string());
+    let mut text = ui
+        .data_mut(|d| d.get_temp::<String>(id))
+        .unwrap_or_else(|| value.to_string());
     let resp = ui.add(
         egui::TextEdit::singleline(&mut text)
             .id(id.with("edit"))
@@ -923,16 +1089,16 @@ fn number_field(ui: &mut Ui, key: &str, value: &mut u16, range: std::ops::RangeI
     );
     if resp.changed() {
         text.retain(|c| c.is_ascii_digit());
-        if let Ok(n) = text.parse::<u16>() {
-            if range.contains(&n) {
-                *value = n;
-            }
+        if let Ok(n) = text.parse::<u16>()
+            && range.contains(&n)
+        {
+            *value = n;
         }
     }
-    if resp.lost_focus() {
-        if let Ok(n) = text.parse::<u32>() {
-            *value = n.clamp(*range.start() as u32, *range.end() as u32) as u16;
-        }
+    if resp.lost_focus()
+        && let Ok(n) = text.parse::<u32>()
+    {
+        *value = n.clamp(*range.start() as u32, *range.end() as u32) as u16;
     }
     if resp.has_focus() {
         ui.data_mut(|d| d.insert_temp(id, text));
@@ -943,7 +1109,8 @@ fn number_field(ui: &mut Ui, key: &str, value: &mut u16, range: std::ops::RangeI
 
 fn separator(ui: &mut Ui) {
     let (rect, _) = ui.allocate_exact_size(vec2(ui.available_width(), 1.0), Sense::hover());
-    ui.painter().rect_filled(rect, CornerRadius::ZERO, pal::HAIRLINE);
+    ui.painter()
+        .rect_filled(rect, CornerRadius::ZERO, pal::HAIRLINE);
 }
 
 /// Menu row: full width, text on the left, highlight on hover.
@@ -954,21 +1121,35 @@ fn menu_item(ui: &mut Ui, text: &str) -> egui::Response {
     if resp.hovered() || resp.has_focus() {
         p.rect_filled(rect, CornerRadius::same(6), pal::PILL);
     }
-    p.text(pos2(rect.left() + 8.0, rect.center().y), Align2::LEFT_CENTER, text, FontId::proportional(13.5), pal::TEXT);
+    p.text(
+        pos2(rect.left() + 8.0, rect.center().y),
+        Align2::LEFT_CENTER,
+        text,
+        FontId::proportional(13.5),
+        pal::TEXT,
+    );
     resp
 }
 
 /// Menu row with a switch on the right. The whole row toggles.
 fn menu_switch(ui: &mut Ui, title: &str, on: &mut bool) {
-    let row = ui.allocate_ui_with_layout(vec2(ui.available_width(), 30.0), Layout::left_to_right(Align::Center), |ui| {
-        ui.add_space(8.0);
-        ui.label(RichText::new(title).size(13.5).color(pal::TEXT));
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+    let row = ui.allocate_ui_with_layout(
+        vec2(ui.available_width(), 30.0),
+        Layout::left_to_right(Align::Center),
+        |ui| {
             ui.add_space(8.0);
-            small_switch(ui, on, title);
-        });
-    });
-    let resp = ui.interact(row.response.rect, row.response.id.with("row"), Sense::click());
+            ui.label(RichText::new(title).size(13.5).color(pal::TEXT));
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                ui.add_space(8.0);
+                small_switch(ui, on, title);
+            });
+        },
+    );
+    let resp = ui.interact(
+        row.response.rect,
+        row.response.id.with("row"),
+        Sense::click(),
+    );
     if resp.clicked() {
         *on = !*on;
     }
@@ -981,13 +1162,19 @@ fn field_label(ui: &mut Ui, text: &str) {
 
 fn zone_pill(ui: &mut Ui, zone: Zone) {
     let color = pal::ZONES[zone as usize];
-    let galley = ui.painter().layout_no_wrap(zone.name().into(), FontId::proportional(13.0), pal::TEXT);
+    let galley =
+        ui.painter()
+            .layout_no_wrap(zone.name().into(), FontId::proportional(13.0), pal::TEXT);
     let size = vec2(galley.size().x + 30.0, 26.0);
     let (rect, _) = ui.allocate_exact_size(size, Sense::hover());
     let p = ui.painter();
     p.rect_filled(rect, CornerRadius::same(13), pal::PILL);
     p.circle_filled(pos2(rect.left() + 14.0, rect.center().y), 4.0, color);
-    p.galley(pos2(rect.left() + 24.0, rect.center().y - galley.size().y / 2.0), galley, pal::TEXT);
+    p.galley(
+        pos2(rect.left() + 24.0, rect.center().y - galley.size().y / 2.0),
+        galley,
+        pal::TEXT,
+    );
 }
 
 /// Title + description on the left, switch on the right. The whole row toggles.
@@ -999,9 +1186,15 @@ fn setting_switch(ui: &mut Ui, title: &str, desc: &str, on: &mut bool) {
             ui.label(RichText::new(title).size(15.0).color(pal::TEXT));
             ui.label(RichText::new(desc).size(12.5).color(pal::TEXT_2));
         });
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| switch(ui, on, title));
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            switch(ui, on, title)
+        });
     });
-    let resp = ui.interact(row.response.rect, row.response.id.with("row"), Sense::click());
+    let resp = ui.interact(
+        row.response.rect,
+        row.response.id.with("row"),
+        Sense::click(),
+    );
     if resp.clicked() {
         *on = !*on;
     }
@@ -1023,7 +1216,9 @@ fn switch_sized(ui: &mut Ui, on: &mut bool, label: &str, h: f32) -> egui::Respon
         *on = !*on;
         resp.mark_changed();
     }
-    resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::CheckBox, ui.is_enabled(), *on, label));
+    resp.widget_info(|| {
+        egui::WidgetInfo::selected(egui::Role::CheckBox, ui.is_enabled(), *on, label)
+    });
     let t = ui.ctx().animate_bool_responsive(resp.id, *on);
     let p = ui.painter();
     let mut bg = lerp_color(pal::SWITCH_OFF, pal::ACCENT, t);
@@ -1035,7 +1230,12 @@ fn switch_sized(ui: &mut Ui, on: &mut bool, label: &str, h: f32) -> egui::Respon
     let x = egui::lerp((rect.left() + r)..=(rect.right() - r), t);
     p.circle_filled(pos2(x, rect.center().y), r - 3.0, Color32::WHITE);
     if resp.has_focus() {
-        p.rect_stroke(rect.expand(3.0), CornerRadius::same(r as u8 + 3), Stroke::new(2.0, pal::FOCUS), egui::StrokeKind::Outside);
+        p.rect_stroke(
+            rect.expand(3.0),
+            CornerRadius::same(r as u8 + 3),
+            Stroke::new(2.0, pal::FOCUS),
+            egui::StrokeKind::Outside,
+        );
     }
     resp
 }
@@ -1065,7 +1265,8 @@ fn heart_points(center: Pos2, size: f32) -> Vec<Pos2> {
         .map(|i| {
             let t = i as f32 / 72.0 * std::f32::consts::TAU;
             let x = 16.0 * t.sin().powi(3);
-            let y = 13.0 * t.cos() - 5.0 * (2.0 * t).cos() - 2.0 * (3.0 * t).cos() - (4.0 * t).cos();
+            let y =
+                13.0 * t.cos() - 5.0 * (2.0 * t).cos() - 2.0 * (3.0 * t).cos() - (4.0 * t).cos();
             pos2(center.x + x * s, center.y - (y + 2.5) * s)
         })
         .collect()
@@ -1078,7 +1279,11 @@ fn paint_heart(ui: &Ui, center: Pos2, size: f32, live: bool) {
     // tip: a closed line would produce miter spikes at those two points.
     let half = pts.len() / 2;
     let right: Vec<Pos2> = pts[..=half].to_vec();
-    let left: Vec<Pos2> = pts[half..].iter().chain(std::iter::once(&pts[0])).copied().collect();
+    let left: Vec<Pos2> = pts[half..]
+        .iter()
+        .chain(std::iter::once(&pts[0]))
+        .copied()
+        .collect();
     if live {
         // Fan fill from the centre (the heart is star-shaped from there)
         // plus an anti-aliased edge.
@@ -1115,9 +1320,14 @@ fn bpm_label(ui: &mut Ui, bpm: Option<u16>, size: f32) {
         Some(b) => (b.to_string(), pal::TEXT),
         None => ("--".to_string(), pal::TEXT_2),
     };
-    let num = ui.painter().layout_no_wrap(text, theme::numeral(size), color);
-    let unit =
-        ui.painter().layout_no_wrap("bpm".into(), FontId::proportional((size * 0.21).max(15.0)), pal::TEXT_2);
+    let num = ui
+        .painter()
+        .layout_no_wrap(text, theme::numeral(size), color);
+    let unit = ui.painter().layout_no_wrap(
+        "bpm".into(),
+        FontId::proportional((size * 0.21).max(15.0)),
+        pal::TEXT_2,
+    );
     let num_base = baseline(&num);
     let gap = 6.0;
     let w = num.size().x + gap + unit.size().x;
@@ -1125,7 +1335,11 @@ fn bpm_label(ui: &mut Ui, bpm: Option<u16>, size: f32) {
     let p = ui.painter();
     p.galley(rect.min, num.clone(), color);
     let unit_top = rect.top() + num_base - baseline(&unit);
-    p.galley(pos2(rect.left() + num.size().x + gap, unit_top), unit, pal::TEXT_2);
+    p.galley(
+        pos2(rect.left() + num.size().x + gap, unit_top),
+        unit,
+        pal::TEXT_2,
+    );
 }
 
 /// History of the last two minutes on a fixed scale (40-200 bpm).
@@ -1136,11 +1350,19 @@ fn history_chart(ui: &mut Ui, v: &View, height: f32) {
 
     for bpm in [80.0, 120.0, 160.0] {
         let y = y_for(rect, bpm);
-        p.line_segment([pos2(rect.left(), y), pos2(rect.right(), y)], Stroke::new(1.0, pal::GRID));
+        p.line_segment(
+            [pos2(rect.left(), y), pos2(rect.right(), y)],
+            Stroke::new(1.0, pal::GRID),
+        );
     }
 
     let span = HISTORY_SPAN.as_secs_f32();
-    let to_pos = |age: f32, bpm: u16| pos2(rect.right() - age / span * rect.width(), y_for(rect, bpm as f32));
+    let to_pos = |age: f32, bpm: u16| {
+        pos2(
+            rect.right() - age / span * rect.width(),
+            y_for(rect, bpm as f32),
+        )
+    };
 
     // Contiguous segments (a 0 or a gap > 3 s breaks the line).
     let mut segments: Vec<Vec<Pos2>> = vec![];
@@ -1172,9 +1394,18 @@ fn history_chart(ui: &mut Ui, v: &View, height: f32) {
         p.add(PathShape::line(seg.clone(), Stroke::new(2.0, pal::ACCENT)));
     }
 
-    let readings: Vec<u16> = v.history.iter().map(|(_, b)| *b).filter(|b| *b > 0).collect();
+    let readings: Vec<u16> = v
+        .history
+        .iter()
+        .map(|(_, b)| *b)
+        .filter(|b| *b > 0)
+        .collect();
     ui.horizontal(|ui| {
-        ui.label(RichText::new("Last 2 minutes").size(12.5).color(pal::TEXT_2));
+        ui.label(
+            RichText::new("Last 2 minutes")
+                .size(12.5)
+                .color(pal::TEXT_2),
+        );
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             let text = match (readings.iter().max(), readings.iter().min()) {
                 (Some(max), Some(min)) => format!("max {max} · min {min}"),

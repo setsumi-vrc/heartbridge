@@ -15,7 +15,10 @@ use crate::theme::pal;
 pub enum TrayAction {
     ToggleWindow,
     /// Physical screen position of the click.
-    OpenPopup { x: f64, y: f64 },
+    OpenPopup {
+        x: f64,
+        y: f64,
+    },
     /// From the Linux tray menu.
     #[cfg_attr(any(windows, target_os = "macos"), allow(dead_code))]
     ShowWindow,
@@ -66,7 +69,10 @@ impl Tray {
                         button_state: MouseButtonState::Up,
                         position,
                         ..
-                    } => Some(TrayAction::OpenPopup { x: position.x, y: position.y }),
+                    } => Some(TrayAction::OpenPopup {
+                        x: position.x,
+                        y: position.y,
+                    }),
                     _ => None,
                 };
                 if let Some(a) = action {
@@ -84,13 +90,25 @@ impl Tray {
         {
             let _ = (&send, &tx);
             let icon = builder.with_menu_on_right_click(false).build().ok()?;
-            Some(Self { icon, events: rx, shown: None })
+            Some(Self {
+                icon,
+                events: rx,
+                shown: None,
+            })
         }
         #[cfg(not(any(windows, target_os = "macos")))]
         {
             let menu = linux::Menu::new(move |a| send(&tx, a));
-            let icon = builder.with_menu(Box::new(menu.menu.clone())).build().ok()?;
-            Some(Self { icon, events: rx, shown: None, menu })
+            let icon = builder
+                .with_menu(Box::new(menu.menu.clone()))
+                .build()
+                .ok()?;
+            Some(Self {
+                icon,
+                events: rx,
+                shown: None,
+                menu,
+            })
         }
     }
 
@@ -125,7 +143,9 @@ fn idle_icon() -> Option<Icon> {
 
 #[cfg(not(any(windows, target_os = "macos")))]
 mod linux {
-    use tray_icon::menu::{CheckMenuItem, Menu as NativeMenu, MenuEvent, MenuItem, PredefinedMenuItem};
+    use tray_icon::menu::{
+        CheckMenuItem, Menu as NativeMenu, MenuEvent, MenuItem, PredefinedMenuItem,
+    };
 
     use super::TrayAction;
 
@@ -151,7 +171,12 @@ mod linux {
                 &quit,
             ]);
 
-            let ids = (open.id().clone(), params.id().clone(), chatbox.id().clone(), quit.id().clone());
+            let ids = (
+                open.id().clone(),
+                params.id().clone(),
+                chatbox.id().clone(),
+                quit.id().clone(),
+            );
             MenuEvent::set_event_handler(Some(move |e: MenuEvent| {
                 let a = if e.id == ids.0 {
                     TrayAction::ShowWindow
@@ -166,7 +191,11 @@ mod linux {
                 };
                 send(a);
             }));
-            Self { menu, params, chatbox }
+            Self {
+                menu,
+                params,
+                chatbox,
+            }
         }
 
         pub fn sync(&self, params: bool, chatbox: bool) {

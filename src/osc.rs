@@ -20,7 +20,7 @@ pub enum Arg<'a> {
 fn push_padded(buf: &mut Vec<u8>, s: &str) {
     buf.extend_from_slice(s.as_bytes());
     buf.push(0);
-    while buf.len() % 4 != 0 {
+    while !buf.len().is_multiple_of(4) {
         buf.push(0);
     }
 }
@@ -52,7 +52,9 @@ pub fn encode(addr: &str, args: &[Arg]) -> Vec<u8> {
 
 /// VRChat's chatbox accepts up to 144 characters.
 pub fn render_chatbox(template: &str, bpm: u16, zone: Zone, battery: Option<u8>) -> String {
-    let bat = battery.map(|b| format!("{b}%")).unwrap_or_else(|| "?".into());
+    let bat = battery
+        .map(|b| format!("{b}%"))
+        .unwrap_or_else(|| "?".into());
     let text = template
         .replace("{bpm}", &bpm.to_string())
         .replace("{zone}", zone.name())
@@ -67,12 +69,15 @@ struct Sender {
 
 impl Sender {
     fn new() -> std::io::Result<Self> {
-        Ok(Self { socket: UdpSocket::bind("0.0.0.0:0")? })
+        Ok(Self {
+            socket: UdpSocket::bind("0.0.0.0:0")?,
+        })
     }
 
     fn send(&self, cfg: &Config, addr: &str, args: &[Arg]) -> std::io::Result<()> {
         let packet = encode(addr, args);
-        self.socket.send_to(&packet, (cfg.osc_host.as_str(), cfg.osc_port))?;
+        self.socket
+            .send_to(&packet, (cfg.osc_host.as_str(), cfg.osc_port))?;
         Ok(())
     }
 
@@ -95,7 +100,11 @@ impl Sender {
 
     fn chatbox(&self, cfg: &Config, text: &str) -> std::io::Result<()> {
         // [text, send immediately, play notification sound]
-        self.send(cfg, "/chatbox/input", &[Arg::Str(text), Arg::Bool(true), Arg::Bool(false)])
+        self.send(
+            cfg,
+            "/chatbox/input",
+            &[Arg::Str(text), Arg::Bool(true), Arg::Bool(false)],
+        )
     }
 }
 
@@ -128,7 +137,12 @@ pub async fn run(shared: Shared) {
         let (bpm, connected, zone_bpm, battery) = {
             let s = shared.state();
             let bpm = s.live_bpm();
-            (bpm, matches!(s.conn, crate::state::Conn::Connected(_)), bpm, s.battery)
+            (
+                bpm,
+                matches!(s.conn, crate::state::Conn::Connected(_)),
+                bpm,
+                s.battery,
+            )
         };
 
         // Schedule the beat from the current BPM.
@@ -232,7 +246,10 @@ mod tests {
 
     #[test]
     fn encode_int() {
-        assert_eq!(encode("/a", &[Arg::Int(1)]), b"/a\0\0,i\0\0\0\0\0\x01".to_vec());
+        assert_eq!(
+            encode("/a", &[Arg::Int(1)]),
+            b"/a\0\0,i\0\0\0\0\0\x01".to_vec()
+        );
     }
 
     #[test]
@@ -248,7 +265,10 @@ mod tests {
 
     #[test]
     fn encode_chatbox() {
-        let p = encode("/chatbox/input", &[Arg::Str("hola"), Arg::Bool(true), Arg::Bool(false)]);
+        let p = encode(
+            "/chatbox/input",
+            &[Arg::Str("hola"), Arg::Bool(true), Arg::Bool(false)],
+        );
         // "/chatbox/input\0\0" (16) + ",sTF\0\0\0\0" (8) + "hola\0\0\0\0" (8)
         assert_eq!(p.len(), 32);
         assert_eq!(&p[16..24], b",sTF\0\0\0\0");
@@ -257,7 +277,12 @@ mod tests {
 
     #[test]
     fn plantilla_chatbox() {
-        let t = render_chatbox("❤ {bpm} bpm · {zone} · {bat}", 128, Zone::Moderate, Some(90));
+        let t = render_chatbox(
+            "❤ {bpm} bpm · {zone} · {bat}",
+            128,
+            Zone::Moderate,
+            Some(90),
+        );
         assert_eq!(t, "❤ 128 bpm · Moderate · 90%");
         assert_eq!(render_chatbox("{zona}", 60, Zone::Rest, None), "Rest");
         let largo = render_chatbox(&"x".repeat(300), 60, Zone::Rest, None);

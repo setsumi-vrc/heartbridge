@@ -37,7 +37,11 @@ fn main() -> eframe::Result<()> {
         .with_icon(window_icon)
         .with_decorations(false)
         .with_resizable(false)
-        .with_inner_size(if compact { app::COMPACT_SIZE } else { app::FULL_SIZE });
+        .with_inner_size(if compact {
+            app::COMPACT_SIZE
+        } else {
+            app::FULL_SIZE
+        });
     if on_top {
         viewport = viewport.with_window_level(egui::WindowLevel::AlwaysOnTop);
     }

@@ -44,7 +44,9 @@ pub async fn run(shared: Shared) {
         };
 
         match run_session(&sensor, &shared).await {
-            Ok(()) => shared.state().log("Session ended: no data for 8 s or the strap disconnected"),
+            Ok(()) => shared
+                .state()
+                .log("Session ended: no data for 8 s or the strap disconnected"),
             Err(e) => shared.state().log(format!("Session error: {e:#}")),
         }
         let _ = sensor.disconnect().await;
@@ -110,7 +112,9 @@ async fn find_sensor(adapter: &Adapter, shared: &Shared) -> Result<Peripheral> {
     loop {
         let filter = shared.config().name_filter.trim().to_lowercase();
         for p in adapter.peripherals().await? {
-            let Some(props) = p.properties().await? else { continue };
+            let Some(props) = p.properties().await? else {
+                continue;
+            };
             let name = props.local_name.clone().unwrap_or_default();
             let lname = name.to_lowercase();
             let matches = if filter.is_empty() {
@@ -122,7 +126,11 @@ async fn find_sensor(adapter: &Adapter, shared: &Shared) -> Result<Peripheral> {
             };
             if matches {
                 adapter.stop_scan().await.ok();
-                let label = if name.is_empty() { "unnamed sensor".into() } else { name };
+                let label = if name.is_empty() {
+                    "unnamed sensor".into()
+                } else {
+                    name
+                };
                 shared.state().log(format!(
                     "Found {label} [{}], RSSI {}",
                     props.address,
@@ -157,7 +165,10 @@ async fn run_session(sensor: &Peripheral, shared: &Shared) -> Result<()> {
     {
         let mut s = shared.state();
         s.battery = v.first().copied();
-        let line = format!("Battery: {}", s.battery.map_or("unknown".into(), |b| format!("{b}%")));
+        let line = format!(
+            "Battery: {}",
+            s.battery.map_or("unknown".into(), |b| format!("{b}%"))
+        );
         s.log(line);
     }
 

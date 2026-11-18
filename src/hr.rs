@@ -59,7 +59,12 @@ pub fn parse_heart_rate(data: &[u8]) -> Option<HeartRate> {
         }
     }
 
-    Some(HeartRate { bpm, contact, energy_kj, rr_ms })
+    Some(HeartRate {
+        bpm,
+        contact,
+        energy_kj,
+        rr_ms,
+    })
 }
 
 /// Intensity zone as a percentage of max heart rate.

@@ -2,6 +2,7 @@
 name = "heartbridge"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.95"
 description = "Heart rate from a Bluetooth LE chest strap to VRChat over OSC"
 
 [dependencies]

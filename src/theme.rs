@@ -54,7 +54,9 @@ enum Face {
 
 /// First existing file among the candidates for this face.
 fn read_font(face: Face) -> Option<Vec<u8>> {
-    candidates(face).into_iter().find_map(|p| std::fs::read(p).ok())
+    candidates(face)
+        .into_iter()
+        .find_map(|p| std::fs::read(p).ok())
 }
 
 #[cfg(windows)]
@@ -71,7 +73,10 @@ fn candidates(face: Face) -> Vec<String> {
 #[cfg(target_os = "macos")]
 fn candidates(face: Face) -> Vec<String> {
     let v: &[&str] = match face {
-        Face::Ui => &["/System/Library/Fonts/SFNS.ttf", "/System/Library/Fonts/Helvetica.ttc"],
+        Face::Ui => &[
+            "/System/Library/Fonts/SFNS.ttf",
+            "/System/Library/Fonts/Helvetica.ttc",
+        ],
         Face::Numeral => &[
             "/System/Library/Fonts/Supplemental/DIN Alternate Bold.ttf",
             "/System/Library/Fonts/SFNS.ttf",
@@ -114,28 +119,56 @@ pub fn install(ctx: &egui::Context) {
     let mut fonts = FontDefinitions::default();
     let mut add = |key: &str, data: Arc<FontData>, family: FontFamily| {
         fonts.font_data.insert(key.into(), data);
-        fonts.families.entry(family).or_default().insert(0, key.into());
+        fonts
+            .families
+            .entry(family)
+            .or_default()
+            .insert(0, key.into());
     };
 
     if let Some(b) = read_font(Face::Ui) {
-        add("segoe-400", with_weight(&b, 400.0), FontFamily::Proportional);
-        add("segoe-600", with_weight(&b, 600.0), FontFamily::Name(UI_STRONG.into()));
+        add(
+            "segoe-400",
+            with_weight(&b, 400.0),
+            FontFamily::Proportional,
+        );
+        add(
+            "segoe-600",
+            with_weight(&b, 600.0),
+            FontFamily::Name(UI_STRONG.into()),
+        );
     }
     if let Some(b) = read_font(Face::Numeral) {
-        add("din-700", with_weight(&b, 700.0), FontFamily::Name(NUMERAL.into()));
+        add(
+            "din-700",
+            with_weight(&b, 700.0),
+            FontFamily::Name(NUMERAL.into()),
+        );
     }
     // Covers ❤ and other chatbox symbols that the UI face may lack.
     if let Some(b) = read_font(Face::Symbols) {
-        fonts.font_data.insert("symbols".into(), Arc::new(FontData::from_owned(b)));
+        fonts
+            .font_data
+            .insert("symbols".into(), Arc::new(FontData::from_owned(b)));
         let list = fonts.families.entry(FontFamily::Proportional).or_default();
-        let at = list.iter().position(|k| k == "segoe-400").map_or(0, |i| i + 1);
+        let at = list
+            .iter()
+            .position(|k| k == "segoe-400")
+            .map_or(0, |i| i + 1);
         list.insert(at, "symbols".into());
     }
 
     // The named families fall back to the proportional ones (symbols, emoji).
-    let fallbacks = fonts.families.get(&FontFamily::Proportional).cloned().unwrap_or_default();
+    let fallbacks = fonts
+        .families
+        .get(&FontFamily::Proportional)
+        .cloned()
+        .unwrap_or_default();
     for name in [NUMERAL, UI_STRONG] {
-        let list = fonts.families.entry(FontFamily::Name(name.into())).or_default();
+        let list = fonts
+            .families
+            .entry(FontFamily::Name(name.into()))
+            .or_default();
         for f in &fallbacks {
             if !list.contains(f) {
                 list.push(f.clone());
