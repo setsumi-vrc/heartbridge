@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeartBridge</title>
+<style>
+  :root {
+    --ground: #0e0f12;
+    --card: #1a1c21;
+    --line: #262930;
+    --field: #121317;
+    --text: #f5f6f8;
+    --text-2: #9aa0a8;
+    --accent: #ff3b47;
+    --ok: #34c77b;
+    --warn: #f5a524;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font: 15px/1.5 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  header .ver { color: var(--text-2); font-size: 13px; }
+  .live {
+    margin-left: auto; display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px;
+  }
+  .live b { font: 700 22px/1 "Bahnschrift", "DIN Alternate", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--warn); flex: none; }
+  .dot.ok { background: var(--ok); }
+  .live span { color: var(--text-2); font-size: 13px; }
+
+  section {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 22px; margin-bottom: 16px;
+  }
+  h2 { font-size: 17px; margin: 0 0 4px; font-weight: 600; }
+  .lede { color: var(--text-2); margin: 0 0 18px; max-width: 62ch; }
+  .grid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 22px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+  label { display: block; color: var(--text-2); font-size: 13px; margin-bottom: 14px; }
+  label > * { margin-top: 6px; }
+  select, input[type=text], input[type=number] {
+    display: block; width: 100%; background: var(--field); color: var(--text);
+    border: 1px solid var(--line); border-radius: 10px; padding: 8px 11px; font: inherit;
+  }
+  input[type=color] {
+    width: 44px; height: 36px; padding: 2px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--field);
+  }
+  .row { display: flex; gap: 12px; }
+  .row > label { flex: 1; }
+  .check { display: flex; align-items: center; gap: 10px; color: var(--text); font-size: 14px; margin-bottom: 10px; }
+  .check input { margin: 0; width: 16px; height: 16px; accent-color: var(--accent); }
+  :focus-visible { outline: 2px solid #ff8a92; outline-offset: 2px; }
+
+  .preview {
+    border-radius: 12px; border: 1px solid var(--line); min-height: 220px;
+    display: grid; place-items: center; overflow: hidden;
+    background-color: #2a2d34;
+    background-image:
+      linear-gradient(45deg, #23262c 25%, transparent 25%, transparent 75%, #23262c 75%),
+      linear-gradient(45deg, #23262c 25%, transparent 25%, transparent 75%, #23262c 75%);
+    background-size: 24px 24px; background-position: 0 0, 12px 12px;
+  }
+  .preview iframe { color-scheme: normal; border: 0; width: 100%; height: 220px; display: block; }
+  .url { display: flex; gap: 8px; margin-top: 12px; }
+  .url input { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  button {
+    background: #d42c37; color: #fff; border: 0; border-radius: 10px;
+    padding: 8px 16px; font: 600 14px/1.4 inherit; cursor: pointer; white-space: nowrap;
+  }
+  button.quiet { background: #262930; color: var(--text); }
+  ol { margin: 12px 0 0; padding-left: 20px; color: var(--text-2); }
+  ol b { color: var(--text); font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td { padding: 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+  td:first-child { width: 40%; padding-right: 16px; }
+  code, pre { font-family: ui-monospace, Consolas, "SF Mono", monospace; font-size: 13px; }
+  td code { color: var(--text); }
+  td a { color: var(--text); }
+  pre {
+    background: var(--field); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; overflow-x: auto; margin: 8px 0 0; color: #d6d9de;
+  }
+  h3 { font-size: 14px; margin: 20px 0 0; font-weight: 600; }
+  .muted { color: var(--text-2); font-size: 13px; margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <svg width="24" height="22" viewBox="0 0 24 22" fill="#ff3b47" aria-hidden="true">
+      <path d="M12 21.6 10.3 20C4.2 14.5 0 10.7 0 6.1 0 2.6 2.7 0 6.1 0 8.1 0 10 .9 12 2.6 14 .9 15.9 0 17.9 0 21.3 0 24 2.6 24 6.1c0 4.6-4.2 8.4-10.3 13.9z"/>
+    </svg>
+    <h1>HeartBridge</h1>
+    <span class="ver">v{{VERSION}} · open channel</span>
+    <div class="live" aria-live="polite">
+      <div class="dot" id="dot"></div>
+      <b id="bpm">--</b>
+      <span id="status">Connecting…</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>OBS overlay</h2>
+    <p class="lede">Your pulse as a browser source, with a transparent background. Pick a look,
+      copy the link and paste it into OBS.</p>
+    <div class="grid">
+      <form id="form" autocomplete="off">
+        <label>Layout
+          <select name="layout">
+            <option value="row">Heart and number side by side</option>
+            <option value="stack">Number under the heart</option>
+            <option value="inside">Number inside the heart</option>
+          </select>
+        </label>
+        <div class="row">
+          <label>Heart <input type="color" name="color" value="#ff3b47"></label>
+          <label>Text <input type="color" name="text" value="#ffffff"></label>
+          <label>Size <input type="number" name="size" value="64" min="12" max="400"></label>
+        </div>
+        <label class="check"><input type="checkbox" name="unit" checked> Show “bpm”</label>
+        <label class="check"><input type="checkbox" name="zone"> Show the heart-rate zone</label>
+        <label class="check"><input type="checkbox" name="zonecolor"> Color the heart by zone</label>
+        <label class="check"><input type="checkbox" name="beat" checked> Beat with the pulse</label>
+        <label class="check"><input type="checkbox" name="shadow" checked> Shadow for busy backgrounds</label>
+        <label class="check"><input type="checkbox" name="hide"> Hide when there’s no reading</label>
+      </form>
+      <div>
+        <div class="preview"><iframe id="preview" title="Overlay preview"></iframe></div>
+        <div class="url">
+          <input type="text" id="url" readonly aria-label="Overlay link">
+          <button type="button" id="copy">Copy link</button>
+        </div>
+        <ol>
+          <li>In OBS, <b>Sources → + → Browser</b>.</li>
+          <li>Paste the link into <b>URL</b>. Width 600, height 300 fits every size up to 128.</li>
+          <li>Leave <b>Custom CSS</b> as it is: the background is already transparent.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Build your own</h2>
+    <p class="lede">Anything that speaks HTTP or WebSocket can read your pulse here: a bot, a
+      game, smart lights, your own overlay. Every address below accepts requests from any
+      origin.</p>
+    <table>
+      <tr><td><code id="ws-url">ws://…/ws</code></td><td>Live stream. A <code>state</code> message on every change and every 2 seconds, and a <code>beat</code> message on each heartbeat.</td></tr>
+      <tr><td><a href="/events"><code>/events</code></a></td><td>The same stream as Server-Sent Events, for <code>EventSource</code> or <code>curl</code>.</td></tr>
+      <tr><td><a href="/api/state"><code>/api/state</code></a></td><td>The current state, once, as JSON.</td></tr>
+      <tr><td><a href="/overlay"><code>/overlay</code></a></td><td>The OBS overlay above, with its options in the address.</td></tr>
+    </table>
+
+    <h3>State message, live</h3>
+    <pre id="sample">{}</pre>
+    <p class="muted"><code>bpm</code> and <code>zone</code> are <code>null</code> while there’s no
+      reading. <code>status</code> is one of <code>reading</code>, <code>no_contact</code>,
+      <code>connecting</code>, <code>searching</code> or <code>no_bluetooth</code>.
+      <code>rr_ms</code> holds the beat-to-beat intervals from the last packet, when the strap
+      sends them.</p>
+
+    <h3>Example</h3>
+    <pre id="example"></pre>
+  </section>
+</main>
+<script>
+  const wsUrl = `ws://${location.host}/ws`;
+  document.getElementById("ws-url").textContent = wsUrl;
+  document.getElementById("example").textContent =
+`const ws = new WebSocket("${wsUrl}");
+ws.onmessage = (e) => {
+  const msg = JSON.parse(e.data);
+  if (msg.type === "state") console.log("BPM", msg.bpm, msg.zone);
+  if (msg.type === "beat") console.log("beat");
+};`;
+
+  // Live pill and sample message.
+  const labels = {
+    reading: "Reading", no_contact: "No skin contact", connecting: "Connecting to the strap",
+    searching: "Looking for the strap", no_bluetooth: "No Bluetooth",
+  };
+  let wait = 500;
+  function connect() {
+    const ws = new WebSocket(wsUrl);
+    ws.onopen = () => (wait = 500);
+    ws.onmessage = (e) => {
+      const m = JSON.parse(e.data);
+      if (m.type !== "state") return;
+      document.getElementById("bpm").textContent = m.bpm ?? "--";
+      document.getElementById("status").textContent = labels[m.status] || m.status;
+      document.getElementById("dot").classList.toggle("ok", m.bpm != null);
+      document.getElementById("sample").textContent = JSON.stringify(m, null, 2);
+    };
+    ws.onclose = () => {
+      document.getElementById("status").textContent = "HeartBridge isn’t running";
+      document.getElementById("dot").classList.remove("ok");
+      setTimeout(connect, wait);
+      wait = Math.min(wait * 2, 5000);
+    };
+  }
+  connect();
+
+  // Overlay builder: only options that differ from the defaults go in the link.
+  const form = document.getElementById("form");
+  const defaults = { layout: "row", color: "ff3b47", text: "ffffff", size: "64",
+    unit: true, zone: false, zonecolor: false, beat: true, shadow: true, hide: false };
+  let timer;
+  function build() {
+    const p = new URLSearchParams();
+    for (const [k, d] of Object.entries(defaults)) {
+      const el = form.elements[k];
+      const v = el.type === "checkbox" ? el.checked
+        : el.type === "color" ? el.value.slice(1) : el.value;
+      if (v !== d) p.set(k, typeof v === "boolean" ? (v ? "1" : "0") : v);
+    }
+    const qs = p.toString();
+    const url = `${location.origin}/overlay${qs ? "?" + qs : ""}`;
+    document.getElementById("url").value = url;
+    clearTimeout(timer);
+    timer = setTimeout(() => (document.getElementById("preview").src = url), 150);
+  }
+  form.addEventListener("input", build);
+  build();
+
+  const copy = document.getElementById("copy");
+  copy.addEventListener("click", async () => {
+    const field = document.getElementById("url");
+    try { await navigator.clipboard.writeText(field.value); }
+    catch { field.select(); document.execCommand("copy"); }
+    copy.textContent = "Copied";
+    setTimeout(() => (copy.textContent = "Copy link"), 1500);
+  });
+</script>
+</body>
+</html>

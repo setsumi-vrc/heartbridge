@@ -18,6 +18,25 @@ pub enum Conn {
     Connected(String),
 }
 
+/// What the open channel (local HTTP/WebSocket server) is doing.
+#[derive(Debug, Default, Clone)]
+pub struct ChannelStatus {
+    /// Address it is listening on, when it is.
+    pub listening: Option<String>,
+    pub error: Option<String>,
+    /// Apps connected to the live stream (WebSocket or SSE).
+    pub clients: usize,
+}
+
+/// Published to everything listening on the open channel.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Event {
+    /// The pulse, the connection or the battery changed.
+    Update,
+    /// One heartbeat, timed from the current BPM.
+    Beat,
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct OscStatus {
     pub last_send: Option<Instant>,
@@ -36,6 +55,7 @@ pub struct State {
     pub history: VecDeque<(Instant, u16)>,
     pub last_beat: Option<Instant>,
     pub osc: OscStatus,
+    pub channel: ChannelStatus,
     /// For the debug window.
     pub started: Instant,
     pub log: VecDeque<(Duration, String)>,
@@ -55,6 +75,7 @@ impl Default for State {
             history: VecDeque::new(),
             last_beat: None,
             osc: OscStatus::default(),
+            channel: ChannelStatus::default(),
             started: Instant::now(),
             log: VecDeque::new(),
             packets: 0,
@@ -117,6 +138,9 @@ pub struct Shared {
     pub config: Arc<Mutex<Config>>,
     pub hr_updated: Arc<tokio::sync::Notify>,
     pub config_changed: Arc<tokio::sync::Notify>,
+    /// Same as `config_changed`, for the open channel (a `Notify` wakes one task).
+    pub channel_config: Arc<tokio::sync::Notify>,
+    pub events: tokio::sync::broadcast::Sender<Event>,
     pub ctx: egui::Context,
 }
 
@@ -127,12 +151,22 @@ impl Shared {
             config: Arc::new(Mutex::new(config)),
             hr_updated: Arc::new(tokio::sync::Notify::new()),
             config_changed: Arc::new(tokio::sync::Notify::new()),
+            channel_config: Arc::new(tokio::sync::Notify::new()),
+            events: tokio::sync::broadcast::channel(64).0,
             ctx,
         }
     }
 
     pub fn state(&self) -> std::sync::MutexGuard<'_, State> {
         self.state.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
+    /// Tells everything listening that the pulse, connection or battery
+    /// changed: OSC, the open channel and the window.
+    pub fn changed(&self) {
+        self.hr_updated.notify_one();
+        let _ = self.events.send(Event::Update);
+        self.ctx.request_repaint();
     }
 
     pub fn config(&self) -> Config {

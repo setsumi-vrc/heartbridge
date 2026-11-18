@@ -73,6 +73,8 @@ pub struct HeartBridgeApp {
     debug_open: bool,
     /// Height of the history chart, adjusted so both columns end together.
     chart_h: f32,
+    /// When "Copy OBS link" was pressed, for the "Copied" feedback.
+    copied_at: Option<Instant>,
     quitting: bool,
 }
 
@@ -92,6 +94,7 @@ impl HeartBridgeApp {
             popup_h: 220.0,
             debug_open: std::env::var_os("HEARTBRIDGE_OPEN_DEBUG").is_some(),
             chart_h: 72.0,
+            copied_at: None,
             quitting: false,
         }
     }
@@ -119,6 +122,7 @@ impl HeartBridgeApp {
         *self.shared.config.lock().unwrap_or_else(|e| e.into_inner()) = self.cfg.clone();
         self.shared.state().log("Settings saved");
         self.shared.config_changed.notify_one();
+        self.shared.channel_config.notify_one();
         self.cfg.save();
         self.saved = self.cfg.clone();
     }
@@ -158,6 +162,7 @@ struct View {
     history: Vec<(f32, u16)>,
     osc_error: Option<String>,
     osc_recent: bool,
+    channel: crate::state::ChannelStatus,
 }
 
 impl View {
@@ -179,6 +184,7 @@ impl View {
                 .osc
                 .last_send
                 .is_some_and(|t| t.elapsed() < Duration::from_secs(7)),
+            channel: s.channel.clone(),
         }
     }
 
@@ -465,6 +471,7 @@ impl HeartBridgeApp {
                     let bottom = left.max_rect().bottom();
                     animating = self.pulse_card(left, v);
                     self.status_card(left, v);
+                    self.channel_card(left, v);
                     slack = bottom - left.min_rect().bottom();
                     self.vrchat_card(right, v);
                     self.settings_card(right);
@@ -539,6 +546,83 @@ impl HeartBridgeApp {
                 ui.add_space(2.0);
                 ui.label(RichText::new(hint).size(13.0).color(pal::TEXT_2));
             }
+        });
+    }
+
+    /// The open channel: on/off, where it listens, the OBS link and how many
+    /// apps are connected.
+    fn channel_card(&mut self, ui: &mut Ui, v: &View) {
+        card(ui, |ui| {
+            setting_switch(
+                ui,
+                "Open channel",
+                "Your pulse for OBS, bots and any other app",
+                &mut self.cfg.channel_enabled,
+            );
+            ui.horizontal(|ui| {
+                let host_w = ui.available_width() - 80.0 - 40.0 - 2.0 * ui.spacing().item_spacing.x;
+                ui.add(
+                    egui::TextEdit::singleline(&mut self.cfg.channel_host)
+                        .font(FontId::proportional(15.0))
+                        .margin(Margin::symmetric(12, 9))
+                        .desired_width(host_w)
+                        .hint_text(RichText::new("127.0.0.1").color(pal::TEXT_2)),
+                )
+                .on_hover_text("127.0.0.1: this PC only. 0.0.0.0: every device on your network.");
+                ui.label(RichText::new("port").size(13.0).color(pal::TEXT_2));
+                number_field(
+                    ui,
+                    "channel-port",
+                    &mut self.cfg.channel_port,
+                    1..=65535,
+                    80.0,
+                );
+            });
+
+            let url = self.cfg.channel_url();
+            let ready = self.cfg.channel_enabled && v.channel.listening.is_some();
+            ui.horizontal(|ui| {
+                let copied = self
+                    .copied_at
+                    .is_some_and(|t| t.elapsed() < Duration::from_millis(1500));
+                let label = if copied { "Copied" } else { "Copy OBS link" };
+                if ui
+                    .add_enabled(ready, action_button(label))
+                    .on_hover_text("Paste it into an OBS Browser source")
+                    .clicked()
+                {
+                    ui.ctx().copy_text(format!("{url}/overlay"));
+                    self.copied_at = Some(Instant::now());
+                    ui.ctx().request_repaint_after(Duration::from_millis(1600));
+                }
+                if ui
+                    .add_enabled(ready, action_button("Open page"))
+                    .on_hover_text("Overlay builder and the API, in your browser")
+                    .clicked()
+                {
+                    open_in_browser(&url);
+                }
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    let (dot, text) = if !self.cfg.channel_enabled {
+                        (pal::TEXT_DIM, "Off".to_string())
+                    } else if v.channel.error.is_some() {
+                        (pal::ERROR, "Can't open the port".to_string())
+                    } else if v.channel.listening.is_none() {
+                        (pal::TEXT_DIM, "Starting…".to_string())
+                    } else {
+                        match v.channel.clients {
+                            0 => (pal::TEXT_DIM, "No apps connected".to_string()),
+                            1 => (pal::OK, "1 app connected".to_string()),
+                            n => (pal::OK, format!("{n} apps connected")),
+                        }
+                    };
+                    let resp = ui.label(RichText::new(text).size(13.0).color(pal::TEXT_2));
+                    if let Some(e) = &v.channel.error {
+                        resp.on_hover_text(e);
+                    }
+                    dot_widget(ui, dot, 8.0);
+                });
+            });
         });
     }
 
@@ -949,6 +1033,14 @@ fn debug_ui(ui: &mut Ui, shared: &Shared, cfg: &Config) {
             "OSC error",
             s.osc.error.clone().unwrap_or_else(|| "none".into()),
         ),
+        (
+            "Open channel",
+            match (&s.channel.listening, &s.channel.error) {
+                (Some(a), _) => format!("listening on {a} · {} clients", s.channel.clients),
+                (None, Some(e)) => format!("error: {e}"),
+                (None, None) => "off".into(),
+            },
+        ),
     ];
 
     ui.label(
@@ -1105,6 +1197,25 @@ fn number_field(
     } else {
         ui.data_mut(|d| d.remove::<String>(id));
     }
+}
+
+fn action_button(text: &str) -> egui::Button<'_> {
+    egui::Button::new(RichText::new(text).size(13.5).color(pal::TEXT))
+        .fill(pal::PILL)
+        .stroke(Stroke::NONE)
+        .corner_radius(CornerRadius::same(8))
+        .min_size(vec2(0.0, 32.0))
+}
+
+/// Opens a link in the default browser.
+fn open_in_browser(url: &str) {
+    #[cfg(windows)]
+    let cmd = std::process::Command::new("explorer").arg(url).spawn();
+    #[cfg(target_os = "macos")]
+    let cmd = std::process::Command::new("open").arg(url).spawn();
+    #[cfg(not(any(windows, target_os = "macos")))]
+    let cmd = std::process::Command::new("xdg-open").arg(url).spawn();
+    let _ = cmd;
 }
 
 fn separator(ui: &mut Ui) {

@@ -73,8 +73,7 @@ async fn demo(shared: Shared) {
             s.last_packet = packet.to_vec();
             s.push_hr(m);
             drop(s);
-            shared.hr_updated.notify_one();
-            shared.ctx.request_repaint();
+            shared.changed();
         }
         tokio::time::sleep(Duration::from_secs(1)).await;
     }
@@ -92,6 +91,7 @@ fn set_conn(shared: &Shared, conn: Conn) {
         s.log(line);
         s.conn = conn;
         drop(s);
+        let _ = shared.events.send(crate::state::Event::Update);
         shared.ctx.request_repaint();
     }
 }
@@ -198,8 +198,7 @@ async fn run_session(sensor: &Peripheral, shared: &Shared) -> Result<()> {
         }
         if let Some(m) = parsed {
             shared.state().push_hr(m);
-            shared.hr_updated.notify_one();
-            shared.ctx.request_repaint();
+            shared.changed();
         }
     }
 }

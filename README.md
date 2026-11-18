@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Your heart rate in VRChat.</b><br>
-  One small app for Windows, Linux and macOS: a Bluetooth chest strap in, your pulse on your avatar and in the chatbox out.
+  One small app for Windows, Linux and macOS: a Bluetooth chest strap in, your pulse on your avatar, in the chatbox, on stream and in any app you write.
 </p>
 
 <p align="center">
@@ -20,6 +20,7 @@
 <p align="center">
   <a href="#-quick-start">Quick start</a> ·
   <a href="#-features">Features</a> ·
+  <a href="#-open-channel">Open channel</a> ·
   <a href="#-troubleshooting">Troubleshooting</a> ·
   <a href="#-building-from-source">Building</a> ·
   <a href="CHANGELOG.md">Changelog</a>
@@ -45,7 +46,9 @@ and works with any strap that uses the standard service.
 | 🧩 **HRtoVRChat parameters** | `HR`, the three digits, `floatHR` and the connected, active and beat flags. |
 | 💬 **Chatbox** | Your own text with `{bpm}`, `{zone}` and `{bat}`. Off until you turn it on. |
 | 📈 **Live view** | Large BPM, heart-rate zone, a two-minute history, strap battery and OSC status. |
-| 🎥 **Compact mode** | A 300×150 window made for OBS window capture and VR overlays. |
+| 🎥 **OBS overlay** | A browser source with a transparent background, three layouts and your own colors. No window capture. |
+| 📡 **Open channel** | Your pulse over HTTP, WebSocket and SSE. Bots, games, lights, your own overlay: anything can read it. |
+| 🪟 **Compact mode** | A 300×150 window for VR overlays and window capture. |
 | 🪶 **Light** | Redraws only when new data arrives, so it stays out of VRChat's way. |
 
 ## 🚀 Quick start
@@ -158,10 +161,84 @@ menu.
   anywhere, with an always-on-top option.
 - **Tray icon** that shows the live BPM. Left click shows or hides the window; right click opens
   the parameter and chatbox switches, Open window and Quit.
+- **Open channel** card: turn it on or off, choose the address and port, copy the OBS link and
+  see how many apps are connected.
 - **Debug window** (the bug icon) with the raw packets from the strap, the parsed values, what's
   going out over OSC and an event log you can copy.
 
 </details>
+
+## 📡 Open channel
+
+HeartBridge runs a small web server with your live pulse, on `http://127.0.0.1:7171` by default.
+The OBS overlay is built on it, and anything else can use it the same way.
+
+### OBS overlay
+
+1. Press **Open page** in the *Open channel* card. Your browser opens the overlay builder.
+2. Pick a layout, colors and size, and press **Copy link**.
+3. In OBS: **Sources → + → Browser**, paste the link into **URL**, width 600, height 300.
+
+The background is transparent and the heart beats with your pulse. The options live in the link,
+so you can also write them by hand:
+
+| Option | Values | Default |
+|---|---|---|
+| `layout` | `row`, `stack` (number under the heart), `inside` (number inside the heart) | `row` |
+| `color`, `text` | Hex color without `#`, for the heart and the text | `ff3b47`, `ffffff` |
+| `size` | Number height in pixels, 12–400 | `64` |
+| `zone` | `1` shows the heart-rate zone under the number | `0` |
+| `zonecolor` | `1` colors the heart by zone | `0` |
+| `unit` | `0` hides "bpm" | `1` |
+| `beat` | `0` stops the heartbeat animation | `1` |
+| `shadow` | `0` removes the shadow behind the text | `1` |
+| `hide` | `1` hides the overlay while there's no reading | `0` |
+
+For example, `http://127.0.0.1:7171/overlay?layout=inside&zonecolor=1&size=48`.
+
+### Your own apps
+
+| Address | What it gives you |
+|---|---|
+| `ws://127.0.0.1:7171/ws` | Live stream over WebSocket |
+| `http://127.0.0.1:7171/events` | The same stream as Server-Sent Events |
+| `http://127.0.0.1:7171/api/state` | The current state, once |
+
+The stream sends a `state` message whenever something changes (and every 2 seconds anyway),
+and a `beat` message on each heartbeat:
+
+```json
+{"type":"state","bpm":82,"zone":"Moderate","max_hr":190,"status":"reading","connected":true,
+ "device":"HS500","contact":true,"battery":90,"rr_ms":[731],"time":1795029065430}
+{"type":"beat","bpm":82,"time":1795029066160}
+```
+
+- `bpm` and `zone` are `null` while there's no reading.
+- `status` is `reading`, `no_contact`, `connecting`, `searching` or `no_bluetooth`.
+- `rr_ms` holds the beat-to-beat intervals from the last packet, when the strap sends them.
+- `time` is Unix time in milliseconds.
+
+Ten lines in a browser or Node:
+
+```js
+const ws = new WebSocket("ws://127.0.0.1:7171/ws");
+ws.onmessage = (e) => {
+  const msg = JSON.parse(e.data);
+  if (msg.type === "state") console.log("BPM", msg.bpm, msg.zone);
+  if (msg.type === "beat") console.log("beat");
+};
+```
+
+Or from a terminal: `curl -N http://127.0.0.1:7171/events`.
+
+Every address accepts requests from any origin, so a web page hosted anywhere can read it.
+
+### Address and port
+
+`127.0.0.1` means only this PC can connect. Set the address to `0.0.0.0` to let other devices on
+your network in, or to a single interface's IP. Past that, HeartBridge stays out of the way:
+put it behind Tailscale, a tunnel, a reverse proxy or a relay of your own, and send your pulse
+wherever you like.
 
 ## 🩺 Troubleshooting
 
@@ -193,6 +270,16 @@ says <i>no skin contact</i> until readings come in.
 </details>
 
 <details>
+<summary><b>The overlay shows "--" or nothing</b></summary>
+
+- Check that the *Open channel* card says it's on and not *Can't open the port*. If another app
+  uses port 7171, pick a different port and copy the link again.
+- `--` means HeartBridge is running but has no reading: look at the strap.
+- In OBS, press **Refresh cache of current page** in the browser source's properties after
+  changing the link.
+</details>
+
+<details>
 <summary><b>Reporting a problem</b></summary>
 
 Open the debug window (bug icon in the title bar), press **Copy log** and paste it into an
@@ -209,8 +296,9 @@ Settings live in `heartbridge.json`:
 | Linux | `~/.config/heartbridge/` |
 | macOS | `~/Library/Application Support/HeartBridge/` |
 
-Deleting the file resets everything. Your heart rate goes only to the OSC address you set
-(your own PC by default). Nothing else is sent anywhere.
+Deleting the file resets everything. HeartBridge sends your heart rate to the OSC address you set
+and serves it on the open channel's address, both on your own PC by default. It doesn't send
+anything anywhere else on its own.
 
 ## 🔧 Building from source
 

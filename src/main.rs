@@ -9,6 +9,7 @@
 
 mod app;
 mod ble;
+mod channel;
 mod config;
 mod hr;
 mod icon;
@@ -67,7 +68,7 @@ fn main() -> eframe::Result<()> {
 
 fn spawn_background(shared: Shared) {
     std::thread::Builder::new()
-        .name("ble-osc".into())
+        .name("background".into())
         .spawn(move || {
             let rt = tokio::runtime::Builder::new_multi_thread()
                 .worker_threads(2)
@@ -76,8 +77,9 @@ fn spawn_background(shared: Shared) {
                 .expect("tokio runtime");
             rt.block_on(async move {
                 tokio::spawn(osc::run(shared.clone()));
+                tokio::spawn(channel::run(shared.clone()));
                 ble::run(shared).await;
             });
         })
-        .expect("ble-osc thread");
+        .expect("background thread");
 }

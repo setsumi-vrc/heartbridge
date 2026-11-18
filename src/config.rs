@@ -30,6 +30,12 @@ pub struct Config {
     pub always_on_top: bool,
     pub compact: bool,
     pub animate_beat: bool,
+
+    /// Open channel: HTTP, WebSocket and SSE with the live pulse, for OBS
+    /// and any other app. 127.0.0.1 = this PC only; 0.0.0.0 = the network.
+    pub channel_enabled: bool,
+    pub channel_host: String,
+    pub channel_port: u16,
 }
 
 impl Default for Config {
@@ -48,6 +54,9 @@ impl Default for Config {
             always_on_top: false,
             compact: false,
             animate_beat: true,
+            channel_enabled: true,
+            channel_host: "127.0.0.1".into(),
+            channel_port: 7171,
         }
     }
 }
@@ -105,6 +114,19 @@ impl Config {
         }
     }
 
+    /// Address to show and link to (a wildcard bind is reachable locally at 127.0.0.1).
+    pub fn channel_url(&self) -> String {
+        let host = match self.channel_host.trim() {
+            "" | "0.0.0.0" | "::" | "[::]" => "127.0.0.1",
+            h => h,
+        };
+        if host.contains(':') && !host.starts_with('[') {
+            format!("http://[{host}]:{}", self.channel_port)
+        } else {
+            format!("http://{host}:{}", self.channel_port)
+        }
+    }
+
     pub fn chatbox_interval(&self) -> std::time::Duration {
         std::time::Duration::from_secs_f32(self.chatbox_interval_secs.max(2.0))
     }
@@ -126,6 +148,19 @@ mod tests {
         assert_eq!(c.osc_port, 9001);
         assert!(!c.send_chatbox);
         assert_eq!(c.osc_host, "127.0.0.1");
+    }
+
+    #[test]
+    fn channel_url_for_every_bind() {
+        let mut c = Config::default();
+        assert_eq!(c.channel_url(), "http://127.0.0.1:7171");
+        c.channel_host = "0.0.0.0".into();
+        assert_eq!(c.channel_url(), "http://127.0.0.1:7171");
+        c.channel_host = "192.168.1.20".into();
+        c.channel_port = 8080;
+        assert_eq!(c.channel_url(), "http://192.168.1.20:8080");
+        c.channel_host = "::1".into();
+        assert_eq!(c.channel_url(), "http://[::1]:8080");
     }
 
     #[test]

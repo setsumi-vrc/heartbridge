@@ -12,8 +12,9 @@ eframe = { version = "0.37.0", default-features = false, features = ["glow", "de
 egui = { version = "0.37", default-features = false }
 futures = "0.3.34"
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.154"
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
 tokio = { version = "1.54.1", features = ["full"] }
+tokio-tungstenite = { version = "0.30.0", default-features = false, features = ["handshake"] }
 tray-icon = { version = "0.26.1", default-features = false }
 uuid = "1.29.3"
 

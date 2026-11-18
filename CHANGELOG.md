@@ -4,6 +4,20 @@ All notable changes to HeartBridge are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Open channel: a local web server with the live pulse at `http://127.0.0.1:7171`. A WebSocket
+  (`/ws`) and Server-Sent Events (`/events`) stream with a `state` message on every change and
+  a `beat` message on every heartbeat, and `/api/state` for a single reading. Any origin may
+  connect. The address and port are configurable, and it can be turned off.
+- OBS overlay at `/overlay`: a browser source with a transparent background, three layouts,
+  custom colors and size, zone colors and a heartbeat animation.
+- A page at `/` that builds the overlay link with a live preview and documents the API.
+- An *Open channel* card in the window with the OBS link, a button that opens that page and the
+  number of connected apps.
+
 ## [0.1.0] - 2026-11-18
 
 First release.
@@ -24,4 +38,5 @@ First release.
 - Debug window with the raw strap packets, the OSC state and a copyable event log.
 - Windows, Linux (X11 and Wayland) and macOS builds.
 
+[Unreleased]: https://github.com/setsumi-vrc/heartbridge/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/setsumi-vrc/heartbridge/releases/tag/v0.1.0

@@ -172,6 +172,7 @@ pub async fn run(shared: Shared) {
             _ = sleep_until(next_beat.unwrap_or_else(far_future)) => {
                 let now = tokio::time::Instant::now();
                 shared.state().last_beat = Some(Instant::now());
+                let _ = shared.events.send(crate::state::Event::Beat);
                 shared.ctx.request_repaint();
                 if cfg.send_params {
                     result = sender.param(&cfg, "isHRBeat", Arg::Bool(true));

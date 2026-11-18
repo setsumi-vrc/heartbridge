@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeartBridge overlay</title>
+<style>
+  :root {
+    --heart: #ff3b47;
+    --text: #ffffff;
+    --size: 64px;
+  }
+  html, body {
+    margin: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+  body {
+    font-family: "Bahnschrift", "DIN Alternate", "Segoe UI Variable Display", "Segoe UI",
+      system-ui, sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--size) * 0.22);
+    padding: calc(var(--size) * 0.18);
+    transition: opacity 400ms ease;
+  }
+  .wrap.stack { flex-direction: column; gap: calc(var(--size) * 0.06); }
+  .wrap.inside { position: relative; }
+  .wrap.gone { opacity: 0; }
+  .shadow .num, .shadow .side { text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55); }
+  .shadow svg { filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45)); }
+
+  svg {
+    width: calc(var(--size) * 1.05);
+    height: calc(var(--size) * 1.05);
+    fill: var(--heart);
+    transition: fill 600ms ease, opacity 400ms ease;
+    will-change: transform;
+  }
+  .inside svg { width: calc(var(--size) * 2.1); height: calc(var(--size) * 2.1); }
+  .idle svg { opacity: 0.35; }
+
+  .num {
+    font-size: var(--size);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .inside .num {
+    position: absolute;
+    left: 50%;
+    top: 47%;
+    transform: translate(-50%, -50%);
+    font-size: calc(var(--size) * 0.62);
+    text-shadow: none;
+  }
+  .side { display: flex; flex-direction: column; gap: calc(var(--size) * 0.04); }
+  .wrap:not(.stack):not(.inside) .side { align-self: flex-end; margin-bottom: calc(var(--size) * 0.14); }
+  .unit, .zone {
+    font-size: calc(var(--size) * 0.3);
+    font-weight: 600;
+    line-height: 1.1;
+    opacity: 0.85;
+  }
+  .zone { opacity: 0.7; }
+  .stack .side, .inside .side { align-items: center; }
+  .inside .side { display: none; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap idle" id="wrap">
+  <svg viewBox="0 0 24 22" aria-hidden="true" id="heart">
+    <path d="M12 21.6 10.3 20C4.2 14.5 0 10.7 0 6.1 0 2.6 2.7 0 6.1 0 8.1 0 10 .9 12 2.6 14 .9 15.9 0 17.9 0 21.3 0 24 2.6 24 6.1c0 4.6-4.2 8.4-10.3 13.9z"/>
+  </svg>
+  <div class="num" id="num">--</div>
+  <div class="side">
+    <div class="unit" id="unit">bpm</div>
+    <div class="zone" id="zone" hidden></div>
+  </div>
+</div>
+<script>
+  // Options in the address: ?layout=row|stack|inside &color=ff3b47 &text=ffffff
+  // &size=64 &unit=0 &zone=1 &zonecolor=1 &hide=1 &shadow=0 &beat=0
+  const q = new URLSearchParams(location.search);
+  const opt = (k, d) => (q.has(k) ? q.get(k) : d);
+  const on = (k, d) => !["0", "false", "no", "off"].includes(String(opt(k, d)).toLowerCase());
+  const hex = (v, d) => (/^[0-9a-f]{3,8}$/i.test(v || "") ? "#" + v : d);
+
+  const root = document.documentElement.style;
+  const baseColor = hex(opt("color"), "#ff3b47");
+  root.setProperty("--heart", baseColor);
+  root.setProperty("--text", hex(opt("text"), "#ffffff"));
+  const size = Math.min(400, Math.max(12, parseFloat(opt("size", "64")) || 64));
+  root.setProperty("--size", size + "px");
+
+  const wrap = document.getElementById("wrap");
+  const heart = document.getElementById("heart");
+  const num = document.getElementById("num");
+  const zone = document.getElementById("zone");
+  const layout = opt("layout", "row");
+  if (layout === "stack" || layout === "inside") wrap.classList.add(layout);
+  if (on("shadow", 1)) wrap.classList.add("shadow");
+  document.getElementById("unit").hidden = !on("unit", 1);
+  const showZone = on("zone", 0);
+  const zoneColor = on("zonecolor", 0);
+  const hideIdle = on("hide", 0);
+  const animate = on("beat", 1);
+  const zoneColors = {
+    Rest: "#5b9cf5", Light: "#34c77b", Moderate: "#f5d024", Hard: "#f58a24", Max: "#ff3b47",
+  };
+
+  let bpm = null;
+  function render(s) {
+    bpm = s.bpm;
+    const live = bpm != null;
+    num.textContent = live ? bpm : "--";
+    wrap.classList.toggle("idle", !live);
+    wrap.classList.toggle("gone", hideIdle && !live);
+    zone.hidden = !showZone || !live;
+    zone.textContent = s.zone || "";
+    heart.style.fill = zoneColor && live && zoneColors[s.zone] ? zoneColors[s.zone] : baseColor;
+  }
+
+  function beat() {
+    if (!animate || bpm == null || !heart.animate) return;
+    const period = 60000 / Math.max(30, Math.min(220, bpm));
+    heart.animate(
+      [
+        { transform: "scale(1)" },
+        { transform: "scale(1.16)", offset: 0.18 },
+        { transform: "scale(0.98)", offset: 0.45 },
+        { transform: "scale(1)" },
+      ],
+      { duration: Math.min(420, period * 0.7), easing: "ease-out" }
+    );
+  }
+
+  let wait = 500;
+  function connect() {
+    const ws = new WebSocket(`ws://${location.host}/ws`);
+    ws.onopen = () => (wait = 500);
+    ws.onmessage = (e) => {
+      const m = JSON.parse(e.data);
+      if (m.type === "state") render(m);
+      else if (m.type === "beat") beat();
+    };
+    ws.onclose = () => {
+      render({ bpm: null });
+      setTimeout(connect, wait);
+      wait = Math.min(wait * 2, 5000);
+    };
+  }
+  connect();
+</script>
+</body>
+</html>
