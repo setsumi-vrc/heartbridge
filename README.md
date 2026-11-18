@@ -1,4 +1,4 @@
-# HS500 Pulse
+# HeartBridge
 
 Sends your heart rate from a Bluetooth chest strap to VRChat over OSC: to the chatbox, to avatar parameters, or both. Built for the GEOID HS500, and works with any strap that uses the standard Bluetooth Heart Rate service.
 
@@ -45,7 +45,7 @@ Requires Windows 10/11 with Bluetooth LE and a recent stable Rust toolchain.
 
 ## Settings
 
-Settings are saved to `hs500-pulso.json` next to the executable. They cover:
+Settings are saved to `heartbridge.json` next to the executable. They cover:
 
 - the OSC host and port (default `127.0.0.1:9000`)
 - your max heart rate, which sets the zones
@@ -53,4 +53,4 @@ Settings are saved to `hs500-pulso.json` next to the executable. They cover:
 - always on top
 - the heartbeat animation
 
-For testing without a strap, set `HS500_DEMO=1` to get a simulated pulse.
+For testing without a strap, set `HEARTBRIDGE_DEMO=1` to get a simulated pulse.

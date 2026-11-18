@@ -51,7 +51,7 @@ impl Tray {
         }));
 
         let icon = TrayIconBuilder::new()
-            .with_tooltip("HS500 Pulse")
+            .with_tooltip("HeartBridge")
             .with_icon(idle_icon()?)
             .with_menu_on_left_click(false)
             .with_menu_on_right_click(false)
@@ -72,8 +72,8 @@ impl Tray {
         };
         let _ = self.icon.set_icon(icon);
         let tip = match bpm {
-            Some(b) => format!("HS500 Pulse · {b} bpm · {status}"),
-            None => format!("HS500 Pulse · {status}"),
+            Some(b) => format!("HeartBridge · {b} bpm · {status}"),
+            None => format!("HeartBridge · {status}"),
         };
         let _ = self.icon.set_tooltip(Some(tip));
     }

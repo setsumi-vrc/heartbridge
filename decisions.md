@@ -54,7 +54,7 @@
 
 ## 2026-11-18 · Closing the window always hides it to the tray
 - Decided by: the user ("when i click X should go to tray not close the app")
-- Why: closing during play would otherwise stop sending to VRChat; "Quit HS500 Pulse" in the popup is the only way out, so the "Close to tray" setting was removed.
+- Why: closing during play would otherwise stop sending to VRChat; "Quit HeartBridge" in the popup is the only way out, so the "Close to tray" setting was removed.
 - Rejected: close exits the app.
 - Rests on: the principle that the app never gets in VRChat's way.
 
@@ -87,3 +87,9 @@
 - Why: the raw packet bytes, parsed fields, OSC state and an event log make a strap or VRChat problem diagnosable without a console.
 - Rejected: a text button inside a card (competes with the pulse).
 - Rests on: the user's request of 2026-11-18.
+
+## 2026-11-18 · The app is called HeartBridge
+- Decided by: the user ("use heartbridge")
+- Why: HS500 is the strap's model; the app works with any standard BLE heart-rate strap, so the name describes what it does instead of the device.
+- Rejected: HS500 Pulse (tied to one device), Pulse OSC, Beatlink, HR Relay.
+- Rests on: the user's request of 2026-11-18. Settings move to heartbridge.json; an existing hs500-pulso.json is read once as a fallback.

@@ -29,7 +29,7 @@ A single native executable, light enough to leave running alongside VRChat, that
 ## Capabilities and Constraints
 - Reads BPM, skin contact, RR intervals and battery (services 0x180D / 0x2A37, 0x180F / 0x2A19).
 - Sends `/chatbox/input` with an editable template, plus avatar parameters: HR, onesHR, tensHR, hundredsHR, floatHR, isHRConnected, isHRActive, isHRBeat.
-- Settings persist in `hs500-pulso.json` next to the executable.
+- Settings persist in `heartbridge.json` next to the executable.
 - UI in English.
 - Borderless 800×700 window with its own title bar (drag, debug, compact, minimize, close), two columns, no scrolling.
 - A debug window shows the raw strap and OSC state and an event log that can be copied.

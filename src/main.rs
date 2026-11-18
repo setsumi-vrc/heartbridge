@@ -1,4 +1,4 @@
-//! hs500-pulso: reads a GEOID HS500 strap (or any standard BLE heart-rate
+//! HeartBridge: reads a GEOID HS500 strap (or any standard BLE heart-rate
 //! sensor) and sends the pulse to VRChat over OSC.
 //!
 //! The window (eframe/egui) and the tray icon run on the main thread;
@@ -33,7 +33,7 @@ fn main() -> eframe::Result<()> {
     };
 
     let mut viewport = egui::ViewportBuilder::default()
-        .with_title("HS500 Pulse")
+        .with_title("HeartBridge")
         .with_icon(window_icon)
         .with_decorations(false)
         .with_resizable(false)
@@ -49,14 +49,14 @@ fn main() -> eframe::Result<()> {
     };
 
     eframe::run_native(
-        "HS500 Pulse",
+        "HeartBridge",
         options,
         Box::new(move |cc| {
             theme::install(&cc.egui_ctx);
             let shared = Shared::new(config, cc.egui_ctx.clone());
             spawn_background(shared.clone());
             let tray = tray::Tray::new(&cc.egui_ctx);
-            Ok(Box::new(app::PulsoApp::new(shared, tray)))
+            Ok(Box::new(app::HeartBridgeApp::new(shared, tray)))
         }),
     )
 }

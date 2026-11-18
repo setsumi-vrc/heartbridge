@@ -1,5 +1,5 @@
 ---
-name: HS500 Pulse
+name: HeartBridge
 description: A native Windows heart-rate bridge to VRChat; a dark heart-rate app with rounded cards and a red heart, read at a glance on the desktop, in a VR overlay and on stream.
 colors:
   accent: "#FF3B47"
@@ -160,13 +160,13 @@ components:
     height: "330px"
 ---
 
-# Design System: HS500 Pulse
+# Design System: HeartBridge
 
 ## Overview
 
 **Creative North Star: "The Bedside Monitor, Finished"**
 
-HS500 Pulse is the category standard for heart-rate apps executed with full finish: a near-black ground, rounded charcoal cards, one red heart, and a number large enough to read from across a dim room, through a VR overlay or in an OBS capture. Everything is native egui, painted in the app's own palette; no control is left in egui's stock grey. The window has no system frame; its own title bar sits on the ground colour so the whole window reads as one surface.
+HeartBridge is the category standard for heart-rate apps executed with full finish: a near-black ground, rounded charcoal cards, one red heart, and a number large enough to read from across a dim room, through a VR overlay or in an OBS capture. Everything is native egui, painted in the app's own palette; no control is left in egui's stock grey. The window has no system frame; its own title bar sits on the ground colour so the whole window reads as one surface.
 
 The hierarchy is fixed by the job: the pulse first (drawn heart, Bahnschrift numeral, zone pill, two-minute trace), then whether the strap is connected and VRChat is receiving (status rows with coloured dots), then the two send switches, then the settings, all visible at once in two columns with no scrolling. Density is calm; cards are separated by tone and a hairline, never by shadow. Motion is spent only on the heartbeat and on state changes, and the app redraws only when it has to, because it runs beside VRChat under heavy GPU load.
 
@@ -284,7 +284,7 @@ The heart is the signature form: a parametric curve (16 sin³t; 13 cos t - 5 cos
 - 44 x 26 capsule; track blends Switch Off to Pulse Red as it turns on, a 20 px white knob slides with egui's responsive animation; hover brightens the track 12%; focus draws a 2 px Soft Pulse ring 3 px outside.
 
 ### Navigation
-- **Title bar:** 44 px on Night Ground; an 18 px live heart at 28 px from the left, "HS500 Pulse" at 46 px; the bar drags the window.
+- **Title bar:** 44 px on Night Ground; an 18 px live heart at 28 px from the left, "HeartBridge" at 46 px; the bar drags the window.
 - **Settings card:** 17 px semibold title; OSC host and port on one row; max heart rate and strap name side by side; then the always-on-top and heartbeat switches.
 - **Tray popup:** 240 px wide, square, card colour with a hairline; 36 px numeral with a 24 px heart, a 12.5 px status line, two 30 px menu rows with 20 px switches, and two 30 px left-aligned menu items with a pill-colour hover. It is created hidden, sized to its content, and shown with the Windows open animation turned off.
 - **Debug window:** native frame, 560 x 620, ground colour; a two-column grid of raw state in 12.5 px monospace and the event log in a field-coloured box with Copy log and Clear.

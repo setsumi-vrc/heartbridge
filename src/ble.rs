@@ -19,7 +19,7 @@ const BATTERY_LEVEL: Uuid = uuid_from_u16(0x2A19);
 const SILENCE_TIMEOUT: Duration = Duration::from_secs(8);
 
 pub async fn run(shared: Shared) {
-    if std::env::var_os("HS500_DEMO").is_some() {
+    if std::env::var_os("HEARTBRIDGE_DEMO").is_some() {
         return demo(shared).await;
     }
     loop {
@@ -55,7 +55,7 @@ pub async fn run(shared: Shared) {
     }
 }
 
-/// Simulated pulse (HS500_DEMO=1), for testing the window and OSC without the strap.
+/// Simulated pulse (HEARTBRIDGE_DEMO=1), for testing the window and OSC without the strap.
 async fn demo(shared: Shared) {
     set_conn(&shared, Conn::Connected("Demo (simulated pulse)".into()));
     shared.state().battery = Some(87);

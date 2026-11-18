@@ -1,4 +1,4 @@
-# HS500 Pulso → VRChat
+# HeartBridge → VRChat
 
 ## Users
 - A VRChat player wearing the GEOID HS500 chest strap during a session, often with the headset on. The app is set up before entering VR; mid-session the window is glanced at on the desktop or through an overlay.
@@ -8,7 +8,7 @@
 ## Product
 - A Rust app for Windows. It connects to the strap over Bluetooth LE using the standard Heart Rate service (0x180D / 0x2A37) and sends OSC over UDP to VRChat at 127.0.0.1:9000.
 - Frontend: a native eframe/egui window that redraws only on new data. It is captured as a window by OBS and VR overlays.
-- Settings persist in `hs500-pulso.json` next to the executable.
+- Settings persist in `heartbridge.json` next to the executable.
 
 ## Constraints
 - VRChat throttles the chatbox, so messages go out at most once every 2 s.

@@ -1,4 +1,4 @@
-//! Settings persisted to `hs500-pulso.json` next to the executable.
+//! Settings persisted to `heartbridge.json` next to the executable.
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -53,16 +53,22 @@ impl Default for Config {
 }
 
 impl Config {
-    fn path() -> PathBuf {
+    fn dir() -> PathBuf {
         std::env::current_exe()
             .ok()
             .and_then(|p| p.parent().map(|d| d.to_path_buf()))
             .unwrap_or_else(|| PathBuf::from("."))
-            .join("hs500-pulso.json")
     }
 
+    fn path() -> PathBuf {
+        Self::dir().join("heartbridge.json")
+    }
+
+    /// Reads `heartbridge.json`; if it doesn't exist yet, falls back to the
+    /// file from before the rename (`hs500-pulso.json`) so settings carry over.
     pub fn load() -> Self {
         std::fs::read_to_string(Self::path())
+            .or_else(|_| std::fs::read_to_string(Self::dir().join("hs500-pulso.json")))
             .ok()
             .and_then(|s| serde_json::from_str(&s).ok())
             .unwrap_or_default()

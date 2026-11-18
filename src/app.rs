@@ -22,7 +22,7 @@ pub const COMPACT_SIZE: [f32; 2] = [300.0, 150.0];
 const POPUP_W: f32 = 240.0;
 const DEBUG_SIZE: [f32; 2] = [560.0, 620.0];
 const TITLE_H: f32 = 44.0;
-const POPUP_TITLE: &str = "HS500 Pulse tray";
+const POPUP_TITLE: &str = "HeartBridge tray";
 
 const BEAT_ANIM: Duration = Duration::from_millis(260);
 const FRAME_33: Duration = Duration::from_millis(33);
@@ -48,7 +48,7 @@ impl Popup {
     }
 }
 
-pub struct PulsoApp {
+pub struct HeartBridgeApp {
     shared: Shared,
     cfg: Config,
     saved: Config,
@@ -63,11 +63,11 @@ pub struct PulsoApp {
     quitting: bool,
 }
 
-impl PulsoApp {
+impl HeartBridgeApp {
     pub fn new(shared: Shared, tray: Option<Tray>) -> Self {
         let cfg = shared.config();
         // Testing aids: open the popup or the debug window at startup.
-        let popup = std::env::var_os("HS500_OPEN_POPUP").map(|_| Popup::new(pos2(1100.0, 700.0)));
+        let popup = std::env::var_os("HEARTBRIDGE_OPEN_POPUP").map(|_| Popup::new(pos2(1100.0, 700.0)));
         Self {
             shared,
             saved: cfg.clone(),
@@ -76,7 +76,7 @@ impl PulsoApp {
             window_visible: true,
             popup,
             popup_h: 220.0,
-            debug_open: std::env::var_os("HS500_OPEN_DEBUG").is_some(),
+            debug_open: std::env::var_os("HEARTBRIDGE_OPEN_DEBUG").is_some(),
             chart_h: 72.0,
             quitting: false,
         }
@@ -185,7 +185,7 @@ impl View {
     }
 }
 
-impl eframe::App for PulsoApp {
+impl eframe::App for HeartBridgeApp {
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
         pal::GROUND.to_normalized_gamma_f32()
     }
@@ -279,7 +279,7 @@ enum Glyph {
     Debug,
 }
 
-impl PulsoApp {
+impl HeartBridgeApp {
     fn title_bar(&mut self, ui: &mut Ui) {
         let (rect, resp) =
             ui.allocate_exact_size(vec2(ui.available_width(), TITLE_H), Sense::click_and_drag());
@@ -291,7 +291,7 @@ impl PulsoApp {
         p.text(
             pos2(rect.left() + 46.0, rect.center().y),
             egui::Align2::LEFT_CENTER,
-            "HS500 Pulse",
+            "HeartBridge",
             theme::ui_strong(14.0),
             pal::TEXT_2,
         );
@@ -383,7 +383,7 @@ fn card(ui: &mut Ui, add: impl FnOnce(&mut Ui)) {
         });
 }
 
-impl PulsoApp {
+impl HeartBridgeApp {
     /// Two columns, no scrolling: pulse and status on the left, VRChat and
     /// settings on the right. The history chart grows or shrinks so both
     /// columns end at the same line.
@@ -683,7 +683,7 @@ impl PulsoApp {
                 if menu_item(ui, "Open window").clicked() {
                     open_window = true;
                 }
-                if menu_item(ui, "Quit HS500 Pulse").clicked() {
+                if menu_item(ui, "Quit HeartBridge").clicked() {
                     quit = true;
                 }
             });
@@ -731,7 +731,7 @@ impl PulsoApp {
     /// Debug window: raw state of the strap and OSC, and the event log.
     fn show_debug(&mut self, ctx: &egui::Context) {
         let builder = egui::ViewportBuilder::default()
-            .with_title("HS500 Pulse debug")
+            .with_title("HeartBridge debug")
             .with_icon(std::sync::Arc::new(egui::IconData {
                 rgba: crate::icon::heart_rgba(32, [0xFF, 0x3B, 0x47]),
                 width: 32,
