@@ -1,0 +1,664 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T17:14:46+00:00",
+  "title": "Design System: HS500 Pulse",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Pulse Red",
+        "canonical": "#FF3B47",
+        "oklch": "oklch(65.7% 0.230 23.5)",
+        "purpose": "Heart fill, switch on, history line, cursor, tray square.",
+        "tonalRamp": [
+          "#2B0000",
+          "#560000",
+          "#86000C",
+          "#B80021",
+          "#EC2539",
+          "#FF6767",
+          "#FF9994",
+          "#FFC9C3"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Soft Pulse",
+        "canonical": "#FF8A92",
+        "oklch": "oklch(76.3% 0.142 16.7)",
+        "purpose": "Focus rings and pressed widget stroke.",
+        "tonalRamp": [
+          "#200003",
+          "#460C16",
+          "#6F252E",
+          "#9B3E48",
+          "#C85A64",
+          "#E7848A",
+          "#FFAEB2",
+          "#FFD8DB"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Night Ground",
+        "canonical": "#0E0F12",
+        "oklch": "oklch(16.9% 0.006 271.0)",
+        "purpose": "Window, title bar, compact window, clear colour.",
+        "tonalRamp": [
+          "#0B0B0C",
+          "#242527",
+          "#414245",
+          "#606164",
+          "#818286",
+          "#A4A5A9",
+          "#C8C9CC",
+          "#EDEEF1"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Charcoal Card",
+        "canonical": "#1A1C21",
+        "oklch": "oklch(22.7% 0.010 268.2)",
+        "purpose": "Cards and tray popup surface.",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#242528",
+          "#404246",
+          "#5F6166",
+          "#808289",
+          "#A3A5AB",
+          "#C7C9CE",
+          "#EDEEF3"
+        ]
+      },
+      "pill": {
+        "role": "neutral",
+        "displayName": "Slate Pill",
+        "canonical": "#262930",
+        "oklch": "oklch(28.1% 0.014 267.1)",
+        "purpose": "Zone pill, default widget fill, caption hover.",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#232529",
+          "#3F4248",
+          "#5E6168",
+          "#7F828B",
+          "#A2A5AD",
+          "#C6C9D0",
+          "#ECEEF4"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#262930",
+        "oklch": "oklch(28.1% 0.014 267.1)",
+        "purpose": "1 px card, window and separator lines.",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#232529",
+          "#3F4248",
+          "#5E6168",
+          "#7F828B",
+          "#A2A5AD",
+          "#C6C9D0",
+          "#ECEEF4"
+        ]
+      },
+      "grid": {
+        "role": "neutral",
+        "displayName": "Chart Grid",
+        "canonical": "#23262C",
+        "oklch": "oklch(26.8% 0.012 264.4)",
+        "purpose": "History gridlines at 80/120/160 bpm.",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#232529",
+          "#404247",
+          "#5E6167",
+          "#7F828A",
+          "#A2A5AC",
+          "#C6C9CF",
+          "#ECEEF3"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Well",
+        "canonical": "#121317",
+        "oklch": "oklch(18.7% 0.008 274.5)",
+        "purpose": "Text-field interiors.",
+        "tonalRamp": [
+          "#0B0B0D",
+          "#242528",
+          "#414245",
+          "#606165",
+          "#818287",
+          "#A3A5AA",
+          "#C8C9CD",
+          "#EDEEF2"
+        ]
+      },
+      "switch-off": {
+        "role": "neutral",
+        "displayName": "Switch Off",
+        "canonical": "#3A3D44",
+        "oklch": "oklch(36.0% 0.013 267.2)",
+        "purpose": "Off switch track, hovered widget stroke.",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#232529",
+          "#404247",
+          "#5E6168",
+          "#7F828A",
+          "#A2A5AC",
+          "#C6C9CF",
+          "#ECEEF4"
+        ]
+      },
+      "hover-fill": {
+        "role": "neutral",
+        "displayName": "Hover",
+        "canonical": "#2E3139",
+        "oklch": "oklch(31.3% 0.015 269.2)",
+        "purpose": "Widget fill on hover.",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#23252A",
+          "#3F4248",
+          "#5E6169",
+          "#7F828C",
+          "#A2A5AD",
+          "#C6C9D0",
+          "#ECEEF5"
+        ]
+      },
+      "pressed-fill": {
+        "role": "neutral",
+        "displayName": "Pressed",
+        "canonical": "#363942",
+        "oklch": "oklch(34.5% 0.016 270.9)",
+        "purpose": "Widget fill on press.",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#23252A",
+          "#3F4249",
+          "#5E616A",
+          "#7F828C",
+          "#A2A5AE",
+          "#C6C9D1",
+          "#ECEEF5"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#F5F6F8",
+        "oklch": "oklch(97.3% 0.003 264.5)",
+        "purpose": "Numerals, values, setting titles.",
+        "tonalRamp": [
+          "#0B0B0C",
+          "#252526",
+          "#414243",
+          "#606163",
+          "#818284",
+          "#A4A5A6",
+          "#C8C9CA",
+          "#EEEEF0"
+        ]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Fog",
+        "canonical": "#9AA0A8",
+        "oklch": "oklch(70.3% 0.014 255.5)",
+        "purpose": "Labels, descriptions, units, placeholders, idle heart.",
+        "tonalRamp": [
+          "#090B0E",
+          "#222529",
+          "#3E4247",
+          "#5D6268",
+          "#7D838A",
+          "#A0A5AC",
+          "#C5CAD0",
+          "#EBEFF4"
+        ]
+      },
+      "text-dim": {
+        "role": "neutral",
+        "displayName": "Ash",
+        "canonical": "#5C6169",
+        "oklch": "oklch(49.1% 0.014 259.8)",
+        "purpose": "Status dots only; never text.",
+        "tonalRamp": [
+          "#090B0E",
+          "#232529",
+          "#3F4248",
+          "#5D6168",
+          "#7D838B",
+          "#A1A5AD",
+          "#C5C9D0",
+          "#EBEFF4"
+        ]
+      },
+      "ok": {
+        "role": "secondary",
+        "displayName": "Connected Green",
+        "canonical": "#34C77B",
+        "oklch": "oklch(73.6% 0.164 155.4)",
+        "purpose": "State dot: connected and sending.",
+        "tonalRamp": [
+          "#001300",
+          "#00320C",
+          "#005323",
+          "#00783B",
+          "#009D55",
+          "#4CBF7E",
+          "#86E0A8",
+          "#BAFFD3"
+        ]
+      },
+      "warn": {
+        "role": "secondary",
+        "displayName": "Amber Warning",
+        "canonical": "#F5A524",
+        "oklch": "oklch(78.2% 0.158 72.3)",
+        "purpose": "State dot: searching, no contact, low battery.",
+        "tonalRamp": [
+          "#1D0300",
+          "#401900",
+          "#663300",
+          "#8F5000",
+          "#BA6F00",
+          "#D99632",
+          "#F7BD71",
+          "#FFE5A8"
+        ]
+      },
+      "error": {
+        "role": "secondary",
+        "displayName": "Error Coral",
+        "canonical": "#FF6B6B",
+        "oklch": "oklch(71.2% 0.181 22.8)",
+        "purpose": "State dot: OSC error.",
+        "tonalRamp": [
+          "#250000",
+          "#4E0008",
+          "#7A151D",
+          "#A92E34",
+          "#D9494D",
+          "#F77976",
+          "#FFA6A1",
+          "#FFD2CD"
+        ]
+      },
+      "close-hover": {
+        "role": "secondary",
+        "displayName": "Caption Close Red",
+        "canonical": "#C42B1C",
+        "oklch": "oklch(53.6% 0.191 30.1)",
+        "purpose": "Close caption hover only.",
+        "tonalRamp": [
+          "#260000",
+          "#500000",
+          "#7C1108",
+          "#AC2B1E",
+          "#DD4735",
+          "#FB7865",
+          "#FFA593",
+          "#FFD2C1"
+        ]
+      },
+      "zone-rest": {
+        "role": "tertiary",
+        "displayName": "Rest Blue",
+        "canonical": "#5B9CF5",
+        "oklch": "oklch(69.0% 0.148 256.7)",
+        "purpose": "Zone pill dot, below 60% of max HR.",
+        "tonalRamp": [
+          "#000828",
+          "#01234F",
+          "#14417B",
+          "#2A61A9",
+          "#4382D8",
+          "#6FA7F3",
+          "#9CCCFF",
+          "#C9F1FF"
+        ]
+      },
+      "zone-light": {
+        "role": "tertiary",
+        "displayName": "Light Green",
+        "canonical": "#34C77B",
+        "oklch": "oklch(73.6% 0.164 155.4)",
+        "purpose": "Zone pill dot, 60-70%.",
+        "tonalRamp": [
+          "#001300",
+          "#00320C",
+          "#005323",
+          "#00783B",
+          "#009D55",
+          "#4CBF7E",
+          "#86E0A8",
+          "#BAFFD3"
+        ]
+      },
+      "zone-moderate": {
+        "role": "tertiary",
+        "displayName": "Moderate Yellow",
+        "canonical": "#F5D024",
+        "oklch": "oklch(86.4% 0.171 95.3)",
+        "purpose": "Zone pill dot, 70-80%.",
+        "tonalRamp": [
+          "#160800",
+          "#352200",
+          "#573E00",
+          "#7C5D00",
+          "#A27E00",
+          "#C2A30A",
+          "#E2C864",
+          "#FFEF9F"
+        ]
+      },
+      "zone-hard": {
+        "role": "tertiary",
+        "displayName": "Hard Orange",
+        "canonical": "#F58A24",
+        "oklch": "oklch(73.5% 0.166 57.4)",
+        "purpose": "Zone pill dot, 80-90%.",
+        "tonalRamp": [
+          "#210000",
+          "#461100",
+          "#6F2A00",
+          "#9B4500",
+          "#C86200",
+          "#E78C3F",
+          "#FFB578",
+          "#FFDEAD"
+        ]
+      },
+      "zone-max": {
+        "role": "tertiary",
+        "displayName": "Max Red",
+        "canonical": "#FF3B47",
+        "oklch": "oklch(65.7% 0.230 23.5)",
+        "purpose": "Zone pill dot, 90% and above.",
+        "tonalRamp": [
+          "#2B0000",
+          "#560000",
+          "#86000C",
+          "#B80021",
+          "#EC2539",
+          "#FF6767",
+          "#FF9994",
+          "#FFC9C3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "numeral-display": {
+        "displayName": "Numeral",
+        "purpose": "The BPM in the full window pulse card."
+      },
+      "numeral-compact": {
+        "displayName": "Numeral Compact",
+        "purpose": "The BPM in compact mode."
+      },
+      "numeral-popup": {
+        "displayName": "Numeral Popup",
+        "purpose": "The BPM in the tray popup."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles."
+      },
+      "title-small": {
+        "displayName": "Title Small",
+        "purpose": "Disclosure header."
+      },
+      "app-name": {
+        "displayName": "App Name",
+        "purpose": "Title bar name, in Fog."
+      },
+      "status-compact": {
+        "displayName": "Status Compact",
+        "purpose": "Compact-mode status line in Paper White."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Setting titles and text-field contents."
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Status rows and popup menu items."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, hints, preview, zone pill text, popup status."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Setting descriptions, chart caption."
+      },
+      "helper": {
+        "displayName": "Helper",
+        "purpose": "Template help line."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "beat",
+        "value": "260ms, scale 1 + 0.14*t^2 with t falling 1 to 0 (ease-out)",
+        "purpose": "Heart pulse on each beat; off when 'Animate the heartbeat' is off."
+      },
+      {
+        "name": "repaint-animating",
+        "value": "33ms (about 30 fps)",
+        "purpose": "Frame interval only while a beat animates."
+      },
+      {
+        "name": "repaint-idle",
+        "value": "1000ms",
+        "purpose": "Idle refresh so stale states update; nothing is drawn while hidden in the tray."
+      },
+      {
+        "name": "switch-toggle",
+        "value": "egui animate_bool_responsive, default animation_time (1/12 s)",
+        "purpose": "Switch track colour blend and knob slide."
+      },
+      {
+        "name": "popup-focus-grace",
+        "value": "600ms",
+        "purpose": "Tray popup takes focus back instead of closing right after opening."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "300x150",
+        "purpose": "Overlay and stream window: heart 48, BPM 76, 16 px status, 12 px dot."
+      },
+      {
+        "name": "popup",
+        "value": "240xauto",
+        "purpose": "Tray popup: heart 24, BPM 36, 20 px switches; height fitted to content (about 248)."
+      },
+      {
+        "name": "full",
+        "value": "800x700",
+        "purpose": "Main window at shipping size: two columns, no scrolling."
+      }
+    ],
+    "icons": [
+      {
+        "name": "window-icon",
+        "value": "64 px implicit heart (x^2+y^2-1)^3 - x^2 y^3 <= 0, 4x4 supersampled, #FF3B47"
+      },
+      {
+        "name": "tray-live",
+        "value": "32 px #FF3B47 square, 7 px radius, white 3x5 pixel digits in 2 px cells on even coordinates"
+      },
+      {
+        "name": "tray-idle",
+        "value": "32 px implicit heart in #9AA0A8"
+      }
+    ],
+    "fonts": [
+      {
+        "name": "Segoe UI Variable",
+        "file": "C:\\Windows\\Fonts\\SegUIVar.ttf",
+        "weights": [
+          400,
+          600
+        ]
+      },
+      {
+        "name": "Bahnschrift",
+        "file": "C:\\Windows\\Fonts\\bahnschrift.ttf",
+        "weights": [
+          700
+        ]
+      },
+      {
+        "name": "Segoe UI Symbol",
+        "file": "C:\\Windows\\Fonts\\seguisym.ttf",
+        "role": "fallback for symbols such as the heart in chatbox text"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Every grouped section of the main window.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Send to VRChat</div><div class=\"ds-card-body\">Avatar parameters</div></div>",
+      "css": ".ds-card{background:#1A1C21;border:1px solid #262930;border-radius:16px;padding:18px;width:360px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;color:#F5F6F8;} .ds-card-title{font-weight:600;font-size:17px;margin-bottom:10px;} .ds-card-body{font-size:15px;}"
+    },
+    {
+      "name": "Title Bar",
+      "kind": "nav",
+      "refersTo": "title-bar",
+      "description": "44 px merged title bar on the ground colour with painted 46 px caption glyphs; close hovers #C42B1C.",
+      "html": "<div class=\"ds-titlebar\"><svg class=\"ds-tb-heart\" viewBox=\"-17 -17 34 34\" width=\"18\" height=\"18\"><path d=\"M0 -5 C-4 -14 -16 -12 -16 -3 C-16 5 -6 10 0 15 C6 10 16 5 16 -3 C16 -12 4 -14 0 -5Z\" fill=\"#FF3B47\"/></svg><span class=\"ds-tb-name\">HS500 Pulse</span><span class=\"ds-tb-spacer\"></span><button class=\"ds-cap\" aria-label=\"Compact mode\"><svg width=\"14\" height=\"11\" viewBox=\"0 0 14 11\"><rect x=\"0.65\" y=\"0.65\" width=\"12.7\" height=\"9.7\" rx=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/><rect x=\"7.5\" y=\"6\" width=\"4.5\" height=\"3\" rx=\"1\" fill=\"currentColor\"/></svg></button><button class=\"ds-cap\" aria-label=\"Minimize\"><svg width=\"10\" height=\"10\"><line x1=\"0\" y1=\"5\" x2=\"10\" y2=\"5\" stroke=\"currentColor\" stroke-width=\"1.3\"/></svg></button><button class=\"ds-cap ds-cap-close\" aria-label=\"Close to tray\"><svg width=\"10\" height=\"10\"><path d=\"M0 0L10 10M10 0L0 10\" stroke=\"currentColor\" stroke-width=\"1.3\"/></svg></button></div>",
+      "css": ".ds-titlebar{display:flex;align-items:center;height:44px;width:800px;background:#0E0F12;font-family:'Segoe UI Variable','Segoe UI',sans-serif;} .ds-tb-heart{margin-left:19px;} .ds-tb-name{margin-left:9px;font-size:14px;font-weight:600;color:#9AA0A8;} .ds-tb-spacer{flex:1;} .ds-cap{width:46px;height:44px;border:0;border-radius:0;background:transparent;color:#9AA0A8;display:grid;place-items:center;} .ds-cap:hover{background:#262930;color:#F5F6F8;} .ds-cap-close:hover{background:#C42B1C;color:#F5F6F8;} .ds-cap:focus-visible{outline:2px solid #FF8A92;outline-offset:-4px;border-radius:4px;}"
+    },
+    {
+      "name": "Pulse Readout",
+      "kind": "custom",
+      "refersTo": "numeral-display",
+      "description": "Drawn heart, Bahnschrift BPM with bpm on a shared baseline, zone pill.",
+      "html": "<div class=\"ds-pulse\"><svg viewBox=\"-17 -17 34 34\" width=\"52\" height=\"52\" class=\"ds-heart\"><path d=\"M0 -5 C-4 -14 -16 -12 -16 -3 C-16 5 -6 10 0 15 C6 10 16 5 16 -3 C16 -12 4 -14 0 -5Z\" fill=\"#FF3B47\"/></svg><span class=\"ds-bpm\">121</span><span class=\"ds-unit\">bpm</span><span class=\"ds-zone\"><i></i>Light</span></div>",
+      "css": ".ds-pulse{display:flex;align-items:baseline;gap:6px;background:#1A1C21;padding:18px;border-radius:16px;border:1px solid #262930;width:360px;} .ds-heart{align-self:center;margin-right:10px;animation:ds-beat 1s infinite;} @keyframes ds-beat{0%{transform:scale(1.14);animation-timing-function:ease-out}26%{transform:scale(1)}100%{transform:scale(1)}} .ds-bpm{font-family:Bahnschrift,sans-serif;font-weight:700;font-size:88px;line-height:1;color:#F5F6F8;} .ds-unit{font-family:'Segoe UI Variable','Segoe UI',sans-serif;font-size:18.5px;color:#9AA0A8;} .ds-zone{margin-left:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 16px 0 10px;border-radius:13px;background:#262930;color:#F5F6F8;font-family:'Segoe UI Variable','Segoe UI',sans-serif;font-size:13px;} .ds-zone i{width:8px;height:8px;border-radius:50%;background:#34C77B;display:inline-block;}"
+    },
+    {
+      "name": "Setting Switch",
+      "kind": "button",
+      "refersTo": "switch-on",
+      "description": "Title and description left, painted 44x26 switch right; the whole row toggles.",
+      "html": "<label class=\"ds-setting\"><span><span class=\"ds-set-title\">Avatar parameters</span><span class=\"ds-set-desc\">HR, floatHR, isHRBeat and the rest</span></span><input type=\"checkbox\" class=\"ds-switch\" checked></label>",
+      "css": ".ds-setting{display:flex;align-items:center;justify-content:space-between;width:360px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;} .ds-set-title{display:block;font-size:15px;color:#F5F6F8;} .ds-set-desc{display:block;margin-top:2px;font-size:12.5px;color:#9AA0A8;} .ds-switch{appearance:none;width:44px;height:26px;border-radius:13px;background:#3A3D44;position:relative;margin:0;transition:background .08s;} .ds-switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .08s;} .ds-switch:checked{background:#FF3B47;} .ds-switch:checked::after{left:21px;} .ds-switch:hover{filter:brightness(1.12);} .ds-switch:focus-visible{outline:2px solid #FF8A92;outline-offset:3px;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "Recessed well field; also used for numeric entry (no spinners).",
+      "html": "<input class=\"ds-input\" placeholder=\"Any heart-rate sensor\">",
+      "css": ".ds-input{background:#121317;border:1px solid #262930;border-radius:10px;padding:9px 12px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;font-size:15px;color:#F5F6F8;width:320px;caret-color:#FF3B47;} .ds-input::placeholder{color:#9AA0A8;} .ds-input:hover{border-color:#3A3D44;} .ds-input:focus-visible{outline:none;border-color:#FF8A92;} .ds-input::selection{background:rgba(255,59,71,.35);}"
+    },
+    {
+      "name": "Zone Pill",
+      "kind": "chip",
+      "refersTo": "zone-pill",
+      "description": "Slate capsule; the zone colour lives only on its dot.",
+      "html": "<span class=\"ds-pill\"><i></i>Hard</span>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 16px 0 10px;border-radius:13px;background:#262930;color:#F5F6F8;font-family:'Segoe UI Variable','Segoe UI',sans-serif;font-size:13px;} .ds-pill i{width:8px;height:8px;border-radius:50%;background:#F58A24;display:inline-block;}"
+    },
+    {
+      "name": "Status Row",
+      "kind": "custom",
+      "refersTo": "body-small",
+      "description": "Fog label left, white value right with an 8 px state dot.",
+      "html": "<div class=\"ds-status\"><span class=\"ds-st-label\">Strap</span><span class=\"ds-st-val\"><i></i>Connected · 24660-1</span></div>",
+      "css": ".ds-status{display:flex;justify-content:space-between;width:360px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;font-size:14px;} .ds-st-label{color:#9AA0A8;} .ds-st-val{color:#F5F6F8;display:inline-flex;align-items:center;gap:8px;} .ds-st-val i{width:8px;height:8px;border-radius:50%;background:#34C77B;display:inline-block;}"
+    },
+    {
+      "name": "Disclosure Header",
+      "kind": "button",
+      "refersTo": "title-small",
+      "description": "Full-row header with a chevron that rotates 180 degrees when open.",
+      "html": "<button class=\"ds-disc\" aria-expanded=\"false\">More settings<svg width=\"12\" height=\"7\" viewBox=\"0 0 12 7\"><path d=\"M1 1.5L6 6.5L11 1.5\" fill=\"none\" stroke=\"#9AA0A8\" stroke-width=\"2\"/></svg></button>",
+      "css": ".ds-disc{display:flex;justify-content:space-between;align-items:center;width:360px;height:26px;padding:0 4px 0 0;background:none;border:0;font-family:'Segoe UI Variable','Segoe UI',sans-serif;font-weight:600;font-size:15px;color:#E0E1E4;cursor:pointer;} .ds-disc:hover{color:#F5F6F8;} .ds-disc svg{transition:transform .08s;} .ds-disc[aria-expanded=true] svg{transform:rotate(180deg);} .ds-disc:focus-visible{outline:2px solid #FF8A92;outline-offset:3px;border-radius:6px;}"
+    },
+    {
+      "name": "Popup Menu Item",
+      "kind": "button",
+      "refersTo": "menu-item",
+      "description": "Full-width transparent action in the tray popup.",
+      "html": "<button class=\"ds-menu\">Open window</button>",
+      "css": ".ds-menu{width:268px;height:34px;background:transparent;border:0;border-radius:8px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;font-size:14px;color:#F5F6F8;} .ds-menu:hover{background:#2E3139;} .ds-menu:active{background:#363942;} .ds-menu:focus-visible{outline:2px solid #FF8A92;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Bedside Monitor, Finished",
+    "overview": "HS500 Pulse is the category standard for heart-rate apps executed with full finish: a near-black ground, rounded charcoal cards, one red heart, and a number large enough to read from across a dim room, through a VR overlay or in an OBS capture. Everything is native egui, painted in the app's own palette; no control is left in egui's stock grey. The window has no system frame; its own title bar sits on the ground colour so the whole window reads as one surface.\n\nThe hierarchy is fixed by the job: the pulse first (drawn heart, Bahnschrift numeral, zone pill, two-minute trace), then whether the strap is connected and VRChat is receiving (status rows with coloured dots), then the two send switches, then the settings, all visible at once in two columns with no scrolling. Density is calm; cards are separated by tone and a hairline, never by shadow. Motion is spent only on the heartbeat and on state changes, and the app redraws only when it has to, because it runs beside VRChat under heavy GPU load.\n\nThe same world collapses into three expressions: the full window (800 x 700), the compact window (300 x 150) for overlays and stream, and the tray popup (240 wide, height fitted to its content), plus a 32 px tray icon that carries the live BPM in pixel digits.",
+    "keyCharacteristics": [
+      "Always dark: ground, then card, then pill, in three tonal steps.",
+      "One red, used for the heart, the switches when on, the history line and the tray icon.",
+      "Numerals in Bahnschrift 700; every other word in Segoe UI Variable, all loaded from C:\\Windows\\Fonts.",
+      "Every glyph is painted in code: heart, caption buttons (including the debug bug), dots, switches, tray digits. No icon font, no image files.",
+      "Frugal rendering: 30 fps only while a beat animates, otherwise once a second."
+    ],
+    "rules": [
+      {
+        "name": "The One Red Rule",
+        "body": "The accent marks the pulse and an \"on\" state; apart from the 35% text selection and the tray icon square, it is never a surface behind text, a border or a decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Zone Dot Rule",
+        "body": "Zone colours appear only on the zone pill's dot; the pill itself stays slate and its text white.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ash Is Not Text Rule",
+        "body": "text-dim is too faint for words on card (about 2.6:1); it colours dots only. Placeholders and hints use text-secondary.",
+        "section": "colors"
+      },
+      {
+        "name": "The Instrument Numeral Rule",
+        "body": "Bahnschrift is for numbers that are read as measurements (the BPM). Labels, values like \"87%\" and addresses stay in Segoe UI Variable.",
+        "section": "typography"
+      },
+      {
+        "name": "The Shared Baseline Rule",
+        "body": "A unit set beside a numeral shares its baseline; it never centres against the numeral's box.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tone Not Shadow Rule",
+        "body": "A surface is raised by one tonal step and a hairline, never by a drop shadow or glow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** paint every control in the palette: switches, captions, chevron, dots and numeric fields are drawn, not stock egui.",
+      "**Do** keep the BPM in Bahnschrift 700 with \"bpm\" in Fog on the same baseline.",
+      "**Do** separate surfaces by tone plus a 1 px hairline (card on ground, pill on card).",
+      "**Do** use text-secondary (#9AA0A8) for placeholders, hints and descriptions.",
+      "**Do** request a repaint at 33 ms only while a beat animates; otherwise once a second.",
+      "**Do** load fonts from C:\\Windows\\Fonts and fall back to egui's built-ins if missing."
+    ],
+    "donts": [
+      "**Don't** add shadows or glows to cards, popups or the window.",
+      "**Don't** use zone colours anywhere but the zone pill's dot.",
+      "**Don't** set text in text-dim (#5C6169); it is for dots.",
+      "**Don't** use the accent as a surface behind text, except the tray icon's digit square.",
+      "**Don't** introduce a light theme; the app is always dark.",
+      "**Don't** use icon fonts or bitmap assets for UI glyphs."
+    ]
+  }
+}

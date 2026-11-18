@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>HS500 Pulso · envase</title>
+<style>
+  :root{--ground:#16181B;--ink:#E9E7E3;--mute:#8E9196;--hair:#34373C;--band:#2FA66A;--bandInk:#0F1311}
+  *{box-sizing:border-box;margin:0}
+  html,body{width:440px;height:720px;overflow:hidden;background:var(--ground);color:var(--ink);font-family:"Bahnschrift","DIN Alternate","Segoe UI",sans-serif}
+  .band{height:330px;background:var(--band);color:var(--bandInk);padding:20px 24px 0;display:grid;grid-template-rows:auto 1fr auto}
+  .top{display:flex;justify-content:space-between;font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+  .num{display:flex;align-items:flex-end;gap:10px}
+  .num b{font-size:168px;line-height:.82;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+  .num span{font-size:22px;font-weight:600;padding-bottom:10px}
+  .zone{display:flex;justify-content:space-between;align-items:center;padding:12px 0 14px;border-top:1px solid rgba(15,19,17,.35);font-size:15px;font-weight:600}
+  .scale{display:flex;gap:4px}
+  .scale i{width:26px;height:10px;display:block}
+  .hist{height:96px;border-bottom:1px solid var(--hair);position:relative;padding:12px 24px}
+  .hist svg{width:100%;height:72px}
+  .row{display:flex;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--hair);font-family:"Segoe UI Variable Text","Segoe UI",sans-serif;font-size:14px}
+  .row .k{color:var(--mute)}
+  h2{font-family:"Bahnschrift",sans-serif;font-size:15px;font-weight:600;padding:18px 24px 8px;letter-spacing:.02em}
+  .sw{width:38px;height:22px;border-radius:11px;background:#2FA66A;position:relative}
+  .sw::after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+  .sw.off{background:#3A3D42}.sw.off::after{left:3px;right:auto;background:#9A9DA2}
+  .field{margin:0 24px;padding:9px 12px;border:1px solid var(--hair);font-family:"Segoe UI",sans-serif;font-size:14px;color:var(--ink)}
+  .foot{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:14px 24px;border-top:1px solid var(--hair);font-family:"Segoe UI",sans-serif;font-size:13px;color:var(--mute)}
+</style></head><body>
+<div class="band">
+  <div class="top"><span>HS500 Pulso</span><span>Batería 100%</span></div>
+  <div class="num"><b>128</b><span>bpm</span></div>
+  <div class="zone"><span>Zona 3 · Moderada</span>
+    <span class="scale"><i style="background:#3D7FD9"></i><i style="background:#1F7A4C"></i><i style="background:#0F1311"></i><i style="background:#C99A05"></i><i style="background:#B82E30"></i></span></div>
+</div>
+<div class="hist"><svg viewBox="0 0 392 72" preserveAspectRatio="none">
+  <line x1="0" y1="54" x2="392" y2="54" stroke="#34373C"/>
+  <polyline fill="none" stroke="#2FA66A" stroke-width="2" points="0,52 30,50 60,47 90,44 120,40 150,38 180,33 210,30 240,28 270,27 300,25 330,26 360,24 392,23"/></svg></div>
+<div class="row"><span class="k">Banda</span><span>24660-1 · contacto sí</span></div>
+<div class="row"><span class="k">VRChat</span><span>127.0.0.1 : 9000 · enviando</span></div>
+<h2>Enviar a VRChat</h2>
+<div class="row"><span>Parámetros del avatar</span><span class="sw"></span></div>
+<div class="row"><span>Chatbox</span><span class="sw off"></span></div>
+<div class="field">♥ {bpm} bpm</div>
+<div class="foot"><span>Modo compacto</span><span>Siempre visible</span></div>
+</body></html>
